@@ -1,0 +1,6 @@
+PACKAGE NAME: qrankdw-0.0.1-SNAPSHOT
+AUTHOR: Vipul Sharma (vsharma@digg.com)
+Tools Used: Java 6, Maven, Hadoop 0.20, MySQL
+
+Description: This package reads logs from hdfs and create a data warehouse in mysql for click through rate datasets
+Detailed Configurations are in qrank.properties file
