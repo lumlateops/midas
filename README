@@ -1,6 +1,5 @@
-PACKAGE NAME: qrankdw-0.0.1-SNAPSHOT
-AUTHOR: Vipul Sharma (vsharma@digg.com)
-Tools Used: Java 6, Maven, Hadoop 0.20, MySQL
+PACKAGE NAME: midas-0.0.1-SNAPSHOT
+AUTHOR: Vipul Sharma (sharmavipul@gmail.com)
+Tools Used: Java 6, Maven,MySQL
 
-Description: This package reads logs from hdfs and create a data warehouse in mysql for click through rate datasets
-Detailed Configurations are in qrank.properties file
+Description: This is the backend for lumlate. The internal name is Midas based on King Midas. The backend will interact with email server and process emails for users and create the data model.
