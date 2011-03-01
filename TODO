@@ -1,0 +1,13 @@
+associate sender email address with the Retail store
+extract text from image
+
+emails are email marketing with no coupons and one with coupons
+
+for emails coming from groupon, truebates etc associate a deal with a category
+
+
+from coupon emails or deal emails extract deal/copoun value. How to represent $10 off of $60.
+
+more than one deal in email
+
+during email extraction save image, run ocr get relavant text.
