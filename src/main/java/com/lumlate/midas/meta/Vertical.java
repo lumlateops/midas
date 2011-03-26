@@ -2,9 +2,9 @@ package com.lumlate.midas.meta;
 
 import java.util.HashSet;
 
-public class VerticalbyProduct {
+public class Vertical {
 	private HashSet<String> vertical;
-	public VerticalbyProduct(){
+	public Vertical(){
 		this.vertical.add("Sports");
 		this.vertical.add("Movies");
 		this.vertical.add("Restaurant");
@@ -17,8 +17,12 @@ public class VerticalbyProduct {
 		this.vertical.add("Furniture");
 		this.vertical.add("Finance");
 		this.vertical.add("Grocery");
+		this.vertical.add("Local");
+		this.vertical.add("Travel");
+		this.vertical.add("DailyDeal");
 	}
-	public HashSet<String> getvertical() {
+	
+	public HashSet<String> getverticals() {
 		return vertical;
 	}
 	

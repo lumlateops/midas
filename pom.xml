@@ -200,5 +200,15 @@
         <artifactId>signpost-core</artifactId>
         <version>1.2</version>
     </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.3.2</version>
+    </dependency>
+    <dependency>
+        <groupId>com.lumlate</groupId>
+        <artifactId>radixtree</artifactId>
+        <version>0.3</version>
+    </dependency>
   </dependencies>
 </project>

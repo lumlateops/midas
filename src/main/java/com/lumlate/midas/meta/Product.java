@@ -1,32 +1,25 @@
 package com.lumlate.midas.meta;
 
+import java.util.Set;
+
 public class Product {
-	private String department;   //electronics
-	private String producttype;  //headphone
-	private String product;      //bose-xyz headphone
-	private String manufacturer;
-	public String getDepartment() {
-		return department;
+	private Vertical vertical;   //electronics
+	private Set<String> wordcloud;
+	
+	public Vertical getVertical() {
+		return vertical;
 	}
-	public void setDepartment(String department) {
-		this.department = department;
+	public void setVertical(Vertical vertical) {
+		this.vertical = vertical;
 	}
-	public String getProducttype() {
-		return producttype;
+	public Set<String> getWordcloud() {
+		return wordcloud;
 	}
-	public void setProducttype(String producttype) {
-		this.producttype = producttype;
+	public void setWordcloud(Set<String> wordcloud) {
+		this.wordcloud = wordcloud;
 	}
-	public String getProduct() {
-		return product;
-	}
-	public void setProduct(String product) {
-		this.product = product;
-	}
-	public String getManufacturer() {
-		return manufacturer;
-	}
-	public void setManufacturer(String manufacturer) {
-		this.manufacturer = manufacturer;
+	
+	public void addWordinCloud(String word){
+		this.wordcloud.add(word);
 	}
 }

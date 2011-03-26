@@ -2,29 +2,49 @@ package com.lumlate.midas.ml;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.lumlate.midas.email.Email;
 
 public class EmailClassifier {
-	private HashSet<String> categories;
-	private HashMap<String,Boolean> dealhash;
-	private Pattern[] dealregexs;
-	private HashMap<String,Boolean> subscribehash;
+	private HashSet<String> categories=new HashSet<String>();
+	private HashMap<String,Boolean> dealhash=new HashMap<String,Boolean>();
+	private LinkedList<Pattern> dealregexs=new LinkedList();
+	private HashMap<String,Boolean> subscribehash=new HashMap<String,Boolean>();
 	private Pattern[] subscriberegexs;
-	private HashMap<String,Boolean> spamhash;
-	private HashMap<String,Boolean> otherhash;
+	private HashMap<String,Boolean> confirmhash=new HashMap<String,Boolean>();
+	private LinkedList<Pattern> confirmregexs=new LinkedList();
+	private HashMap<String,Boolean> spamhash=new HashMap<String,Boolean>();
+	private HashMap<String,Boolean> otherhash=new HashMap<String,Boolean>();
 	
 	public EmailClassifier(){
 		this.categories.add("deal");
 		this.categories.add("subscription");
 		this.categories.add("spam");
 		this.categories.add("other");
+		this.categories.add("confirmation");
 		this.populatedealhash();
+		this.populateconfirmhash();
 		this.populatesubscribehash();
 		this.compiledealregexes();
+		this.compileconfirmregexes();
 		this.compilesubscriberegexes();
+		
+	}
+
+	private void compileconfirmregexes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void populateconfirmhash() {
+		// TODO Auto-generated method stub
+		this.confirmhash.put("confirm", true);
+		this.confirmhash.put("confirmation", true);
+		this.confirmhash.put("registration", true);
+		this.confirmhash.put("activate", true);
 	}
 
 	private void compilesubscriberegexes() {
@@ -37,9 +57,9 @@ public class EmailClassifier {
 		Pattern r1=Pattern.compile("\\$\\d+\\.\\d+");
 		Pattern r2=Pattern.compile("\\d+%");
 		Pattern r3=Pattern.compile("\\$\\d+ for \\$\\d+");
-		this.dealregexs[0]=r1;
-		this.dealregexs[1]=r2;
-		this.dealregexs[2]=r3;
+		this.dealregexs.add(r1);
+		this.dealregexs.add(r2);
+		this.dealregexs.add(r3);
 	}
 	
 	private void populatesubscribehash() {
@@ -48,10 +68,7 @@ public class EmailClassifier {
 		this.subscribehash.put("thanks", true);
 		this.subscribehash.put("joining", true);
 		this.subscribehash.put("singing", true);
-		this.subscribehash.put("registration", true);
-		this.subscribehash.put("activate", true);
-		this.subscribehash.put("confirm", true);
-		//this.subscribehash.put("", true);
+		this.subscribehash.put("subscription", true);
 	}
 	private void populatedealhash() {
 		this.dealhash.put("sweepstake", true);
@@ -91,7 +108,11 @@ public class EmailClassifier {
 		String subject=msg.getSubject();
 		String[] subjectlist=subject.split(" ");
 		for(String word:subjectlist){
-			if(this.subscribehash.containsKey(word)){
+			if(this.confirmhash.containsKey(word)){
+				if(this.categories.contains("confirmation")){
+					return "confirmation";
+				}
+			}else if(this.subscribehash.containsKey(word)){
 				if(this.categories.contains("subscription")){
 					return "subscription";
 				}
@@ -109,6 +130,7 @@ public class EmailClassifier {
 				}				
 			}
 		}
+		/*
 		for(Pattern p:this.subscriberegexs){
 			Matcher m=p.matcher(subject);
 			if(m.matches()){
@@ -116,7 +138,7 @@ public class EmailClassifier {
 					return "subscription";
 				}				
 			}
-		}		
+		}*/		
 		return "other";
 	}
 }

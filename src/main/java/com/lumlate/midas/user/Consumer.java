@@ -3,8 +3,8 @@ package com.lumlate.midas.user;
 import java.util.HashSet;
 
 import com.lumlate.midas.location.Location;
-import com.lumlate.midas.meta.Interest;
 import com.lumlate.midas.meta.Subscription;
+import com.lumlate.midas.meta.Vertical;
 
 public class Consumer {
 	
@@ -12,7 +12,7 @@ public class Consumer {
 	private String lastname;
 	private String username; //lumlate
 	private String email_address; //external
-	private HashSet<Interest> interest;
+	private HashSet<Vertical> interest;
 	private Location location;
 	private HashSet<Subscription> subscriptions;
 	
@@ -40,10 +40,10 @@ public class Consumer {
 	public void setEmail_address(String email_address) {
 		this.email_address = email_address;
 	}
-	public HashSet<Interest> getInterest() {
+	public HashSet<Vertical> getInterest() {
 		return interest;
 	}
-	public void setInterest(HashSet<Interest> interest) {
+	public void setInterest(HashSet<Vertical> interest) {
 		this.interest = interest;
 	}
 	public Location getLocation() {

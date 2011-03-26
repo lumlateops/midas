@@ -14,13 +14,20 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeUtility;
 
+import com.lumlate.midas.ml.EmailClassifier;
+
 public class EmailParser {
 	private Message msg;
 	Pattern frompattern;
 	Pattern receivedpattern;
-
-
+	boolean is_text;
+	boolean is_html;
+	boolean is_attachment;
+	
 	public EmailParser(){
+		this.is_text=false;
+		this.is_attachment=false;
+		this.is_html=false;
 		this.frompattern=Pattern.compile("(.*)(<.*>)");
 		this.receivedpattern=Pattern.compile("(.*\\[)(.*)(\\].*)");
 	}
@@ -34,26 +41,25 @@ public class EmailParser {
 	}
 
 	private String getText(Part p) throws MessagingException, IOException {
-		boolean textIsHtml = false;
 		if (p.isMimeType("text/*")) {
 			String s = (String)p.getContent();
-			textIsHtml = p.isMimeType("text/html");
 			return s;
 		}
 
 		if (p.isMimeType("multipart/alternative")) {
-			// prefer html text over plain text
 			Multipart mp = (Multipart)p.getContent();
 			String text = null;
 			for (int i = 0; i < mp.getCount(); i++) {
 				Part bp = mp.getBodyPart(i);
 				if (bp.isMimeType("text/plain")) {
 					if (text == null)
+						is_text=true;
 						text = getText(bp);
 					continue;
 				} else if (bp.isMimeType("text/html")) {
 					String s = getText(bp);
 					if (s != null)
+						is_html=true;
 						return s;
 				} else {
 					return getText(bp);
@@ -65,10 +71,10 @@ public class EmailParser {
 			for (int i = 0; i < mp.getCount(); i++) {
 				String s = getText(mp.getBodyPart(i));
 				if (s != null)
+					this.is_attachment=true;
 					return s;
 			}
 		}
-
 		return null;
 	}
 
@@ -124,18 +130,11 @@ public class EmailParser {
 		//body
 		Object body = msg.getContent();
 		String email_content="";
-		if (body instanceof String) {
-			email_content=body.toString()+"\n";
-		}
-		else if (body instanceof Multipart) {
-			Multipart mp = (Multipart)body;
-			int count = mp.getCount();
-			for (int i = 0; i < count; i++) {
-				BodyPart b = mp.getBodyPart(i);
-				email_content+=this.getText(b)+"\n";
-			}
-		}
+		email_content=this.getText(msg);
 		email.setContent(email_content);
+		email.setIs_html(this.is_html);
+		email.setIs_attachment(this.is_attachment);
+		email.setIs_plaintext(this.is_text);
 		return email;
 	}
 

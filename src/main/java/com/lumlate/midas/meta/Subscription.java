@@ -1,13 +1,11 @@
 package com.lumlate.midas.meta;
 
-import java.util.HashSet;
-
 import com.lumlate.midas.user.Retailer;
 
 public class Subscription {
 	private Retailer retailer;
-	private HashSet<String> subscription_emails;
-	private VerticalbyProduct vertical;
+	private Vertical vertical;
+	private String subscription_email;
 	
 	public Retailer getRetailer() {
 		return retailer;
@@ -15,18 +13,16 @@ public class Subscription {
 	public void setRetailer(Retailer retailer) {
 		this.retailer = retailer;
 	}
-	public HashSet<String> getSubscription_emails() {
-		return subscription_emails;
-	}
-	public void setSubscription_emails(HashSet<String> subscription_emails) {
-		this.subscription_emails = subscription_emails;
-	}
-	public VerticalbyProduct getVertical() {
+	public Vertical getVertical() {
 		return vertical;
 	}
-	public void setVertical(VerticalbyProduct vertical) {
+	public void setVertical(Vertical vertical) {
 		this.vertical = vertical;
 	}
-	
-	
+	public String getSubscription_email() {
+		return subscription_email;
+	}
+	public void setSubscription_email(String subscription_email) {
+		this.subscription_email = subscription_email;
+	}
 }
