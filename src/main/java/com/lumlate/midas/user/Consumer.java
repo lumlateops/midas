@@ -10,11 +10,7 @@ public class Consumer {
 	
 	private String firstname;
 	private String lastname;
-	private String username; //lumlate
-	private String email_address; //external
-	private HashSet<Vertical> interest;
-	private Location location;
-	private HashSet<Subscription> subscriptions;
+	private String email_address;
 	
 	public String getFirstname() {
 		return firstname;
@@ -28,37 +24,13 @@ public class Consumer {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
-	public String getUsername() {
-		return username;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
 	public String getEmail_address() {
 		return email_address;
 	}
 	public void setEmail_address(String email_address) {
 		this.email_address = email_address;
 	}
-	public HashSet<Vertical> getInterest() {
-		return interest;
-	}
-	public void setInterest(HashSet<Vertical> interest) {
-		this.interest = interest;
-	}
-	public Location getLocation() {
-		return location;
-	}
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-	public HashSet<Subscription> getSubscriptions() {
-		return subscriptions;
-	}
-	public void setSubscriptions(HashSet<Subscription> subscriptions) {
-		this.subscriptions = subscriptions;
-	} 
 	
 	
-
+	
 }

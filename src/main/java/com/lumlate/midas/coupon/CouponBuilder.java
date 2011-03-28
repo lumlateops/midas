@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 import com.lumlate.midas.email.Email;
 import com.lumlate.midas.location.Location;
 import com.lumlate.midas.meta.Product;
@@ -27,21 +30,40 @@ public class CouponBuilder {
 	Pattern dollar4;
 	Pattern dollar5;
 	Pattern dollar6;
+	Pattern dollar7;
+	Pattern dollar8;
+	Pattern dollar9;
+	Pattern dollar10;
+	Pattern dollar11;
+	Pattern dollar12;
 	
 	public CouponBuilder(){
-		dollar1=Pattern.compile("(.*)(\\$)(\\d+\\.\\d+)(.*\\$)(\\d+\\.\\d+)(.*)"); //$40.00 off of $100.00
-		dollar2=Pattern.compile("(.*)(\\$)(\\d+)(.*\\$)(\\d+)(.*)"); //$40 off of $100
-		dollar3=Pattern.compile("(.*)(\\d+)(-)(\\d+)(\\%)(.*)"); //40-50%
-		dollar4=Pattern.compile("(.*)(\\s+)(\\d+)(\\% [Oo]ff)(.*)"); //40% off
-		dollar5=Pattern.compile("(.*)(\\$)(\\d+)(\\s+)([Oo]ff)(.*)"); //$40 off
-		dollar6=Pattern.compile("(.*)(\\s+)(\\d+)(\\%.*)"); //40%
+		this.CompileDealRegexes();	
 	}
 	
-	public Boolean BuildCoupon(Email email, HtmlParser parsedhtml){
+	private void CompileDealRegexes(){
+		this.dollar1=Pattern.compile("(.*)(\\$)(\\d+\\.\\d+)(.*\\$)(\\d+\\.\\d+)(.*)"); //$40.00 off of $100.00
+		this.dollar2=Pattern.compile("(.*)(\\$)(\\d+)(.*\\$)(\\d+)(.*)"); //$40 off of $100
+		this.dollar3=Pattern.compile("(.*)(\\d+)(-)(\\d+)(\\%)(.*)"); //40-50%
+		this.dollar4=Pattern.compile("(.*)(\\s+)(\\d+)(\\% [Oo]ff)(.*)"); //40% off
+		this.dollar5=Pattern.compile("(.*)(\\$)(\\d+)(\\s+)([Oo]ff)(.*)"); //$40 off
+		this.dollar6=Pattern.compile("(.*)(\\s+)(\\d+)(\\%.*)"); //40%
+		this.dollar7=Pattern.compile("(.*)([Ss]ave up to $)(\\d+)(.*)"); //save up to $40
+		this.dollar8=Pattern.compile("(.*)([Ss]ave up to)(\\s+)(\\d+)(\\%.*)"); //save up to 40%
+		this.dollar9=Pattern.compile("(.*)([Fr]om $)(\\d+)(.*)"); //from $40
+		this.dollar11=Pattern.compile("(.*)($)(\\d+)(.*)"); //$40
+		this.dollar12=Pattern.compile("(.*)(\\d+)(\\%.*)"); //40%
+	}
+	
+	private void CompileDateRegexes(){
+		
+	}
+	
+	public Coupon BuildCoupon(Email email){
 		Coupon coupon=new Coupon();
 		try {
 			if(this.ExtractDealValue(email.getHtml().getTitle())==true){
-				return true;
+				
 			}
 			//this.ExtractExpirationDates();
 			//this.ExtractRetailer();
@@ -52,7 +74,7 @@ public class CouponBuilder {
 			e.printStackTrace();
 		}
 		//return coupon;
-		return false;
+		return coupon;
 	}
 	
 	private void ExtractProduct() {
@@ -63,9 +85,19 @@ public class CouponBuilder {
 		// TODO Auto-generated method stub
 		
 	}
-	private void ExtractRetailer() {
-		// TODO Auto-generated method stub
-		
+	private Coupon ExtractRetailer(Email email,Coupon coupon) throws Exception {
+		this.retailer=new Retailer();
+		if(email.getFromemail()!=null){
+			this.retailer.setDomain(email.getFromemail());
+			if(email.getFromname()!=null){
+				this.retailer.setName(email.getFromname());
+			}
+		}
+		if(email.getFromemail()!=null){
+			this.retailer.setSubscription_email(new InternetAddress(email.getFromemail()));
+		}
+		coupon.setRetailer(retailer);
+		return coupon;
 	}
 	private void ExtractExpirationDates() {
 		// TODO Auto-generated method stub

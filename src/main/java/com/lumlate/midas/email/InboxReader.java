@@ -1,24 +1,17 @@
 package com.lumlate.midas.email;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.*;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
-import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.internet.MimeUtility;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.RecipientStringTerm;
-import javax.mail.search.RecipientTerm;
 import javax.mail.search.SearchTerm;
+
+import com.google.gson.Gson;
 
 import com.lumlate.midas.coupon.CouponBuilder;
 import com.lumlate.midas.email.Email;
@@ -34,6 +27,8 @@ public class InboxReader {
 	private EmailParser parser=new EmailParser();
 	private EmailClassifier emailclassifier=new EmailClassifier();
 	private UrlParser urlparser = new UrlParser();
+	private CouponBuilder cb=new CouponBuilder();
+	
 	public void readImapInbox(String imaphost,String imapport,String connectiontimeout,String imaptimeout){
 
 		Properties props=System.getProperties();
@@ -45,9 +40,8 @@ public class InboxReader {
 		props.setProperty("mail.imap.timeout", imaptimeout);
 		props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		props.setProperty("mail.imap.socketFactory.fallback", "false");
-
+		Gson gson = new Gson();
 		Session session=Session.getDefaultInstance(props, null);
-
 		try {
 			//Store store=session.getStore("imap"); //for lumlate email server
 			
@@ -87,19 +81,17 @@ public class InboxReader {
 				if(!category.isEmpty()){
 					email.setCategory(category);
 				}
-				
+				System.out.println(gson.toJson(email));
+				/*
 				if(category.equalsIgnoreCase("deal") || category.equalsIgnoreCase("subscription")){ //TODO convert category from string to enum
-					//System.out.println(htmlparser.getRawtext());
-					CouponBuilder cb=new CouponBuilder();
 					try {
-						if(cb.BuildCoupon(email, htmlparser)==true){
+						if(cb.BuildCoupon(email)!=null){
 							message[i].setFlag(Flags.Flag.SEEN, true);
 						}
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
-				}
-				//break;
+				}*/
 			  }
 //TODO		persist email // can and probably should be asynchronous using a queue
 			folder.close(true);

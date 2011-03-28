@@ -12,6 +12,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 import com.lumlate.midas.ml.EmailClassifier;
@@ -85,7 +86,7 @@ public class EmailParser {
 		Email email=new Email();
 		//to
 		for(Address t:to){
-			if(t.toString().contains("lumlate.com")){
+			if(t.toString().contains("lumlate")){//TODO dont hard code domain
 				email.setTo(t.toString());
 			}
 		}
@@ -94,7 +95,7 @@ public class EmailParser {
 		String sender = null;
 		for(Address f:from){
 			sender=f.toString();
-		}//use the last sender if multiple hops. verify that the list is sorted by hops?
+		}//TODO use the last sender if multiple hops. verify that the list is sorted by hops?
 		Matcher matcher = this.frompattern.matcher(sender);
 		if(matcher.matches()){
 			email.setFromname(matcher.group(1));
