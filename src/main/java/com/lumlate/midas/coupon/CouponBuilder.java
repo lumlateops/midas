@@ -1,18 +1,21 @@
 package com.lumlate.midas.coupon;
 
-import java.util.Date;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import com.lumlate.midas.email.Email;
-import com.lumlate.midas.location.Location;
 import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
 import com.lumlate.midas.user.Retailer;
-import com.lumlate.midas.utils.HtmlParser;
+import com.google.gson.*;
 
 public class CouponBuilder {
 	private int orginalvalue;
@@ -23,53 +26,80 @@ public class CouponBuilder {
 	private Retailer retailer;
 	private Consumer consumer;
 	private Product product;
+	private Gson gson = new Gson();
 	
-	Pattern dollar1;
-	Pattern dollar2;
-	Pattern dollar3;
-	Pattern dollar4;
-	Pattern dollar5;
-	Pattern dollar6;
-	Pattern dollar7;
-	Pattern dollar8;
-	Pattern dollar9;
-	Pattern dollar10;
-	Pattern dollar11;
-	Pattern dollar12;
+	HashMap<Pattern,DealRegex> dealpatternhash = new HashMap<Pattern,DealRegex>();
+	HashMap<Pattern,ValidDateRegex> datepatternhash = new HashMap<Pattern,ValidDateRegex>();
 	
-	public CouponBuilder(){
-		this.CompileDealRegexes();	
+	File dealregexfile;
+	File validregexfile;
+	BufferedReader dealregexreader;
+	BufferedReader valifregexreader;
+	
+	public CouponBuilder(String dealregexfile, String validregexfile){
+		this.dealregexfile=new File(dealregexfile);
+		System.out.println(dealregexfile);
+		this.validregexfile=new File(validregexfile);
+		this.CompileDealRegexes();
+		//this.CompileDateRegexes();
 	}
 	
 	private void CompileDealRegexes(){
-		this.dollar1=Pattern.compile("(.*)(\\$)(\\d+\\.\\d+)(.*\\$)(\\d+\\.\\d+)(.*)"); //$40.00 off of $100.00
-		this.dollar2=Pattern.compile("(.*)(\\$)(\\d+)(.*\\$)(\\d+)(.*)"); //$40 off of $100
-		this.dollar3=Pattern.compile("(.*)(\\d+)(-)(\\d+)(\\%)(.*)"); //40-50%
-		this.dollar4=Pattern.compile("(.*)(\\s+)(\\d+)(\\% [Oo]ff)(.*)"); //40% off
-		this.dollar5=Pattern.compile("(.*)(\\$)(\\d+)(\\s+)([Oo]ff)(.*)"); //$40 off
-		this.dollar6=Pattern.compile("(.*)(\\s+)(\\d+)(\\%.*)"); //40%
-		this.dollar7=Pattern.compile("(.*)([Ss]ave up to $)(\\d+)(.*)"); //save up to $40
-		this.dollar8=Pattern.compile("(.*)([Ss]ave up to)(\\s+)(\\d+)(\\%.*)"); //save up to 40%
-		this.dollar9=Pattern.compile("(.*)([Fr]om $)(\\d+)(.*)"); //from $40
-		this.dollar11=Pattern.compile("(.*)($)(\\d+)(.*)"); //$40
-		this.dollar12=Pattern.compile("(.*)(\\d+)(\\%.*)"); //40%
+		String line="";
+		try {
+			this.dealregexreader =  new BufferedReader(new FileReader(this.dealregexfile));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			while((line = this.dealregexreader.readLine()) != null){
+				DealRegex regex = this.gson.fromJson(line, DealRegex.class);
+				this.dealpatternhash.put(Pattern.compile(regex.getPattern()), regex);
+			}
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void CompileDateRegexes(){
-		
+		String line="";
+		try {
+			this.valifregexreader =  new BufferedReader(new FileReader(this.validregexfile));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			while((line = this.valifregexreader.readLine()) != null){
+				ValidDateRegex regex = this.gson.fromJson(line, ValidDateRegex.class);
+				this.datepatternhash.put(Pattern.compile(regex.getPattern()), regex);
+			}
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 	
 	public Coupon BuildCoupon(Email email){
 		Coupon coupon=new Coupon();
 		try {
-			if(this.ExtractDealValue(email.getHtml().getTitle())==true){
+			if(this.ExtractDealValue(email.getSubject())!=null){
 				
 			}
-			//this.ExtractExpirationDates();
-			//this.ExtractRetailer();
-			//this.ExtractConsumer();
-			//this.ExtractProduct();
-			//this.Extractdollars("5 hours only! 15% or 20% everything at");
+			if(this.ExtractExpirationDates(email.getSubject())!=null){
+				
+			}
+			this.ExtractRetailer(email, coupon);
+			this.ExtractConsumer(email, coupon);
+			this.ExtractProduct();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -81,10 +111,14 @@ public class CouponBuilder {
 		// TODO Auto-generated method stub
 		
 	}
-	private void ExtractConsumer() {
-		// TODO Auto-generated method stub
-		
+	private Coupon ExtractConsumer(Email email, Coupon coupon) {
+		this.consumer=new Consumer();
+		if(email.getTo()!=null){
+			consumer.setEmail_address(email.getTo());
+		}
+		return coupon;
 	}
+	
 	private Coupon ExtractRetailer(Email email,Coupon coupon) throws Exception {
 		this.retailer=new Retailer();
 		if(email.getFromemail()!=null){
@@ -99,47 +133,42 @@ public class CouponBuilder {
 		coupon.setRetailer(retailer);
 		return coupon;
 	}
-	private void ExtractExpirationDates() {
-		// TODO Auto-generated method stub
-		
-	}
-	private Boolean ExtractDealValue(String text) throws Throwable{
+	
+	private ValidDateRegex ExtractExpirationDates(String text) {
 		if(text.isEmpty()){
-			return false;
+			return null;
 		}
-		//System.out.println("Vipul "+text);
-		Matcher matcher1 = this.dollar1.matcher(text);
-		Matcher matcher2 = this.dollar2.matcher(text);
-		Matcher matcher3 = this.dollar3.matcher(text);
-		Matcher matcher4 = this.dollar4.matcher(text);
-		Matcher matcher5 = this.dollar5.matcher(text);
-		Matcher matcher6 = this.dollar6.matcher(text);
-		
-		if(matcher1.matches()){
-			System.out.println(text+" "+matcher1.group(3)+" "+matcher1.group(5));
-			return true;
+		for(Pattern key:this.datepatternhash.keySet()){
+			Matcher matcher = key.matcher(text);
+			if(matcher.matches()){
+				return this.datepatternhash.get(key);
+			}
 		}
-		else if(matcher2.matches()){
-			System.out.println(text+" "+matcher2.group(3)+" "+matcher2.group(5));
-			return true;
+		return null;
+	}
+
+	private DealRegex ExtractDealValue(String text) throws Exception{
+		if(text.isEmpty()){
+			return null;
 		}
-		else if(matcher3.matches()){
-			System.out.println(text+" "+matcher3.group(2)+" "+matcher3.group(4));
-			return true;
+		for(Pattern key:this.dealpatternhash.keySet()){
+			Matcher matcher = key.matcher(text);
+			if(matcher.matches()){
+				System.out.println("-----");
+				System.out.println(this.dealpatternhash.get(key).getPattern());
+				for(String i:this.dealpatternhash.get(key).getIndexes()){
+					System.out.println(text+" "+matcher.group(Integer.parseInt(i)));
+				}
+				System.out.println("-----");
+				return this.dealpatternhash.get(key);
+			}
 		}
-		else if(matcher4.matches()){
-			System.out.println(text+" "+matcher4.group(3));
-			return true;
-		}
-		else if(matcher5.matches()){
-			System.out.println(text+" "+matcher5.group(3));
-			return true;
-		}
-		else if(matcher6.matches()){
-			System.out.println(text+" "+matcher6.group(3));
-			return true;
-		}else{
-			return false;
-		}
+		System.out.println("NOT MATCHED"+text);
+		return null;
+	}
+	
+	public void Close() throws Throwable{
+		this.dealregexreader.close();
+		this.valifregexreader.close();
 	}
 }

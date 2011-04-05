@@ -1,0 +1,12 @@
+{"pattern":"(.*)(\\$)(\\d+\\.\\d+)(.*\\$)(\\d+\\.\\d+)(.*)","indexes":"3,5","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)(\\$)(\\d+)(.*\\$)(\\d+)(.*)","indexes":"3,5","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)(\\d+)(-)(\\d+)(\\%)(.*)","indexes":"2,4","is_absolute":"false","is_percentage":"true"}
+{"pattern":"(\\d+)(\\%.*)","indexes":"1","is_absolute":"false","is_percentage":"true"}
+{"pattern":"(.*)(\\d+)(\\% [Oo]ff)(.*)","indexes":"2","is_absolute":"false","is_percentage":"true"}
+{"pattern":"(.*)(\\$)(\\d+)(\\s+)([Oo]ff)(.*)","indexes":"3","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)(\\d+)(\\%.*)","indexes":"2","is_absolute":"false","is_percentage":"true"}
+{"pattern":"(.*)([Ss]ave up to $)(\\d+)(.*)","indexes":"3","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)([Ss]ave up to)(\\s+)(\\d+)(\\%.*)","indexes":"4","is_absolute":"false","is_percentage":"true"}
+{"pattern":"(.*)([Fr]om $)(\\d+)(.*)","indexes":"2","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)($)(\\d+)(.*)","indexes":"3","is_absolute":"true","is_percentage":"false"}
+{"pattern":"(.*)(\\d+)(\\%.*)","indexes":"2","is_absolute":"false","is_percentage":"true"}

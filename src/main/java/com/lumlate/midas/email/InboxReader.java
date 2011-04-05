@@ -27,10 +27,12 @@ public class InboxReader {
 	private EmailParser parser=new EmailParser();
 	private EmailClassifier emailclassifier=new EmailClassifier();
 	private UrlParser urlparser = new UrlParser();
-	private CouponBuilder cb=new CouponBuilder();
+	private String dealregexfile;
+	private String dateregexfile;
 	
 	public void readImapInbox(String imaphost,String imapport,String connectiontimeout,String imaptimeout){
-
+		CouponBuilder cb=new CouponBuilder(this.dealregexfile,this.dateregexfile);
+		
 		Properties props=System.getProperties();
 		//props.setProperty("mail.store.protocol", "imap");  //for lumlate mail server
 		props.setProperty("mail.store.protocol", "imaps");   //for gmail
@@ -50,8 +52,9 @@ public class InboxReader {
 			Folder folder=store.getFolder("INBOX");//get inbox
 			folder.open(Folder.READ_WRITE);//open folder only to read
 			FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
-			SearchTerm st=new RecipientStringTerm(Message.RecipientType.TO, "lumlatedeals@gmail.com");
-			Message message[]=folder.search(st);
+			//SearchTerm st=new RecipientStringTerm(Message.RecipientType.TO, "lumlatedeals@gmail.com");
+			//Message message[]=folder.search(st);
+			Message message[] = folder.search(ft);
 
 		    for(int i=0;i<message.length;i++){
 				this.parser.setMsg(message[i]);
@@ -81,8 +84,7 @@ public class InboxReader {
 				if(!category.isEmpty()){
 					email.setCategory(category);
 				}
-				System.out.println(gson.toJson(email));
-				/*
+				//System.out.println(gson.toJson(email));
 				if(category.equalsIgnoreCase("deal") || category.equalsIgnoreCase("subscription")){ //TODO convert category from string to enum
 					try {
 						if(cb.BuildCoupon(email)!=null){
@@ -91,7 +93,10 @@ public class InboxReader {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
-				}*/
+				}
+				else{
+					System.out.println("NOT CATEGORIZED "+email.getSubject());
+				}
 			  }
 //TODO		persist email // can and probably should be asynchronous using a queue
 			folder.close(true);
@@ -125,6 +130,22 @@ public class InboxReader {
 	public void setReceivingHost(String receivingHost) {
 		this.receivingHost = receivingHost;
 	}
+	
+	public String getDealregexfile() {
+		return dealregexfile;
+	}
+
+	public void setDealregexfile(String dealregexfile) {
+		this.dealregexfile = dealregexfile;
+	}
+
+	public String getDateregexfile() {
+		return dateregexfile;
+	}
+
+	public void setDateregexfile(String dateregexfile) {
+		this.dateregexfile = dateregexfile;
+	}
 
 	public static void main(String[] args) {
 		InboxReader newGmailClient=new InboxReader();
@@ -134,6 +155,8 @@ public class InboxReader {
 		newGmailClient.setReceivingHost("mail.lumlate.com");
 		newGmailClient.readImapInbox("mail.lumlate.com","143","5000","5000");
 		*/
+		newGmailClient.setDealregexfile(args[0]);
+		newGmailClient.setDateregexfile(args[1]);
 		
 		newGmailClient.setUsername("lumlatedeals@gmail.com");
 		newGmailClient.setPassword("latelumdeals");
