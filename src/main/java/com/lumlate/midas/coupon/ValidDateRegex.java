@@ -3,9 +3,11 @@ package com.lumlate.midas.coupon;
 import java.util.regex.Pattern;
 
 public class ValidDateRegex {
+	private int id;
 	private String pattern;
 	private String indexes="";
 	private Boolean is_absolute=false;
+	private String desc;
 	
 	public String getPattern() {
 		return pattern;
@@ -24,6 +26,18 @@ public class ValidDateRegex {
 	}
 	public void setIs_absolute(Boolean is_absolute) {
 		this.is_absolute = is_absolute;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getDesc() {
+		return desc;
+	}
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 	
 	

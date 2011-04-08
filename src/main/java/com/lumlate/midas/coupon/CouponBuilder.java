@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,10 +20,8 @@ import com.lumlate.midas.user.Retailer;
 import com.google.gson.*;
 
 public class CouponBuilder {
-	private int orginalvalue;
 	private int dealvalue;
 	private int salepercentage;
-	private int priceaftersale;
 	
 	private Retailer retailer;
 	private Consumer consumer;
@@ -91,12 +91,8 @@ public class CouponBuilder {
 	public Coupon BuildCoupon(Email email){
 		Coupon coupon=new Coupon();
 		try {
-			if(this.ExtractDealValue(email.getSubject())!=null){
-				
-			}
-			if(this.ExtractExpirationDates(email.getSubject())!=null){
-				
-			}
+			ExtractDealValue(email.getSubject());
+			ExtractExpirationDates(email.getSubject());
 			this.ExtractRetailer(email, coupon);
 			this.ExtractConsumer(email, coupon);
 			this.ExtractProduct();
@@ -147,24 +143,34 @@ public class CouponBuilder {
 		return null;
 	}
 
-	private DealRegex ExtractDealValue(String text) throws Exception{
+	private void ExtractDealValue(String text) throws Exception{
 		if(text.isEmpty()){
-			return null;
+			return;
 		}
 		for(Pattern key:this.dealpatternhash.keySet()){
 			Matcher matcher = key.matcher(text);
 			if(matcher.matches()){
-				System.out.println("-----");
-				System.out.println(this.dealpatternhash.get(key).getPattern());
-				for(String i:this.dealpatternhash.get(key).getIndexes()){
-					System.out.println(text+" "+matcher.group(Integer.parseInt(i)));
+				if(this.dealpatternhash.get(key).getIs_percentage()){
+					if(this.dealpatternhash.get(key).getIndexes().length>1){
+						this.salepercentage=Integer.parseInt(Collections.max(Arrays.asList(this.dealpatternhash.get(key).getIndexes())));
+					}else if(this.dealpatternhash.get(key).getIndexes().length==1){
+						this.salepercentage=Integer.parseInt(this.dealpatternhash.get(key).getIndexes()[0]);
+					}
+				}else if(this.dealpatternhash.get(key).getIs_absolute()){
+					if(this.dealpatternhash.get(key).getIndexes().length==2){
+						int value1=Integer.parseInt(this.dealpatternhash.get(key).getIndexes()[0]);
+						int value2=Integer.parseInt(this.dealpatternhash.get(key).getIndexes()[1]);
+						if(value1>value2 && value2>0){
+							this.salepercentage=value2*100/value1;
+						}else if(value1<value2 && value1>0){
+							this.salepercentage=value1*100/value2;
+						}
+					}else if(this.dealpatternhash.get(key).getIndexes().length==1){
+						this.dealvalue=Integer.parseInt(this.dealpatternhash.get(key).getIndexes()[0]);
+					}
 				}
-				System.out.println("-----");
-				return this.dealpatternhash.get(key);
 			}
 		}
-		System.out.println("NOT MATCHED"+text);
-		return null;
 	}
 	
 	public void Close() throws Throwable{

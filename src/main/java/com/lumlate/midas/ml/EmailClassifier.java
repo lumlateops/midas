@@ -54,12 +54,12 @@ public class EmailClassifier {
 
 	private void compiledealregexes() {
 		// TODO Auto-generated method stub
-		Pattern r1=Pattern.compile("\\$\\d+\\.\\d+");
-		Pattern r2=Pattern.compile("\\d+%");
-		Pattern r3=Pattern.compile("\\$\\d+ for \\$\\d+");
-		this.dealregexs.add(r1);
+		//Pattern r1=Pattern.compile("\\$\\d+\\.\\d+");
+		Pattern r2=Pattern.compile("\\d+\\%");
+		//Pattern r3=Pattern.compile("\\$\\d+ for \\$\\d+");
+		Pattern r4=Pattern.compile("\\$\\d+");
 		this.dealregexs.add(r2);
-		this.dealregexs.add(r3);
+		this.dealregexs.add(r4);
 	}
 	
 	private void populatesubscribehash() {
@@ -124,7 +124,7 @@ public class EmailClassifier {
 		}
 		for(Pattern p:this.dealregexs){
 			Matcher m=p.matcher(subject);
-			if(m.matches()){
+			if(m.find()){
 				if(this.categories.contains("deal")){
 					return "deal";
 				}				
