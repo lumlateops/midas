@@ -13,6 +13,7 @@ import javax.mail.search.SearchTerm;
 
 import com.google.gson.Gson;
 
+import com.lumlate.midas.coupon.Coupon;
 import com.lumlate.midas.coupon.CouponBuilder;
 import com.lumlate.midas.email.Email;
 import com.lumlate.midas.email.EmailParser;
@@ -87,7 +88,22 @@ public class InboxReader {
 				//System.out.println(gson.toJson(email));
 				if(category.equalsIgnoreCase("deal") || category.equalsIgnoreCase("subscription")){ //TODO convert category from string to enum
 					try {
-						if(cb.BuildCoupon(email)!=null){
+						Coupon coupon=cb.BuildCoupon(email);
+						if(coupon!=null){/*
+							System.out.println("-------------------------------------------------------");
+							System.out.println(email.getCategory());
+							System.out.println(email.getFromemail());
+							System.out.println(email.getFromname());
+							System.out.println(email.getSubject());
+							System.out.println(email.getTo());
+							System.out.println(email.getRecieveddate());
+							System.out.println(coupon.getDealvalue());
+							System.out.println(coupon.getSalepercentage());
+							System.out.println(coupon.getRetailer().getDomain());
+							System.out.println(coupon.getRetailer().getName());
+							System.out.println(coupon.getRetailer().getSubscription_email().toString());
+							System.out.println("-------------------------------------------------------");
+							*/
 							message[i].setFlag(Flags.Flag.SEEN, true);
 						}
 					} catch (Throwable e) {
