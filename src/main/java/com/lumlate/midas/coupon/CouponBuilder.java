@@ -5,8 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,8 +44,8 @@ public class CouponBuilder {
 		Coupon coupon=new Coupon();
 		try {
 			ExtractDealValue(email.getSubject(),coupon);
-			ExtractExpirationDates(email.getHtml().getRawtext());
-			this.ExtractRetailer(email, coupon);
+			ExtractExpirationDates(email.getHtml().getRawtext(),coupon);
+			this.ExtractRetailer(email, coupon); 
 			this.ExtractConsumer(email, coupon);
 			//this.ExtractProduct();
 		} catch (Throwable e) {
@@ -125,29 +129,38 @@ public class CouponBuilder {
 		}
 	}
 
-	private DateRegex ExtractExpirationDates(String text) {
+	private void ExtractExpirationDates(String text, Coupon coupon) throws Exception {
 		if(text.isEmpty()){
-			return null;
+			return;
 		}
 		//text="sdhfgs dskfg df febuary 14dfjsf";
 		for(Pattern key:this.datepatternhash.keySet()){
-			
 			Matcher matcher = key.matcher(text);
 			if(matcher.matches()){
-				System.out.println("---------------- "+this.datepatternhash.get(key).getId());
-				//System.out.println(this.datepatternhash.get(key).getPattern());
-				System.out.println(matcher.group(0));
-				System.out.println("A");
-				System.out.println(matcher.group(1));
-				System.out.println("----------------");
+				String index=this.datepatternhash.get(key).getIndexes();
+				//System.out.println("------------------------------- "+index);
+				//System.out.println(this.datepatternhash.get(key));
+				String expdate=getExpirationDate(this.datepatternhash.get(key),matcher.group(Integer.parseInt(index)));
+				coupon.setExpiration(expdate);
 			}
+		}
+	}
+
+	private String getExpirationDate(DateRegex data, String value) throws Exception{
+		DateFormat formatter;
+		DateFormat newformatter=new SimpleDateFormat("yyyy-mm-dd 00:00:00");
+		if(value.isEmpty()){
+			if(data.getIs_date()){
+				formatter = new SimpleDateFormat(data.getDesc());
+				 return newformatter.format((Date)formatter.parse(value));
+			}
+		}else{
+			return value;
 		}
 		return null;
 	}
-
 	
 	private void ExtractProduct() {
-		
 	}
 	
 	private Coupon ExtractConsumer(Email email, Coupon coupon) {
@@ -155,7 +168,6 @@ public class CouponBuilder {
 		if(email.getTo()!=null){
 			consumer.setEmail_address(email.getTo());
 		}
-		
 		return coupon;
 	}
 	

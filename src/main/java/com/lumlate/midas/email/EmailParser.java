@@ -41,7 +41,7 @@ public class EmailParser {
 		this.msg = msg;
 	}
 
-	private String getText(Part p) throws MessagingException, IOException {
+	private String getText(Part p) throws MessagingException, IOException, Exception {
 		if (p.isMimeType("text/*")) {
 			String s = (String)p.getContent();
 			return s;
@@ -53,9 +53,10 @@ public class EmailParser {
 			for (int i = 0; i < mp.getCount(); i++) {
 				Part bp = mp.getBodyPart(i);
 				if (bp.isMimeType("text/plain")) {
-					if (text == null)
+					if (text == null){
 						is_text=true;
 						text = getText(bp);
+					}
 					continue;
 				} else if (bp.isMimeType("text/html")) {
 					String s = getText(bp);
@@ -90,7 +91,6 @@ public class EmailParser {
 				email.setTo(t.toString());
 			}
 		}
-
 		//sender
 		String sender = null;
 		for(Address f:from){
@@ -101,7 +101,6 @@ public class EmailParser {
 			email.setFromname(matcher.group(1));
 			email.setFromemail(matcher.group(2));
 		}
-
 		//date
 		email.setRecieveddate(msg.getReceivedDate());
 		email.setSentdate(msg.getSentDate());
@@ -127,15 +126,22 @@ public class EmailParser {
 				email.setSpf_result(temp[0]);
 			}
 		}		
-
+		
 		//body
-		Object body = msg.getContent();
-		String email_content="";
-		email_content=this.getText(msg);
-		email.setContent(email_content);
-		email.setIs_html(this.is_html);
-		email.setIs_attachment(this.is_attachment);
-		email.setIs_plaintext(this.is_text);
+		try{
+			Object body = msg.getContent();
+			String email_content="";
+			email_content=this.getText(msg);
+			if(!(email_content==null)){
+				email.setContent(email_content);
+			}
+			email.setIs_html(this.is_html);
+			email.setIs_attachment(this.is_attachment);
+			email.setIs_plaintext(this.is_text);
+		}catch (Exception err){
+			err.printStackTrace();
+			
+		}
 		return email;
 	}
 

@@ -36,6 +36,10 @@
             		<enabled>true</enabled>
         	</snapshots>
     	</repository>
+	<repository>
+		<id>opennlp.sf.net</id>
+		<url>http://opennlp.sourceforge.net/maven2</url>
+	</repository>
   </repositories>
 
   <build>
@@ -204,6 +208,11 @@
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>1.4</version>
+    </dependency>
+    <dependency>
+	<groupId>opennlp</groupId>
+	<artifactId>tools</artifactId>
+	<version>1.5.0</version>
     </dependency>
   </dependencies>
 </project>

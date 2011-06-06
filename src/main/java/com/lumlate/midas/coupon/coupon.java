@@ -17,8 +17,8 @@ public class Coupon {
 	
 	private Product product;
 	
-	private Date expiration; //when there is a specifc date
-	private Date validupto; //when it says valid upto 2 days
+	private String expiration; //when there is a specifc date
+	private long validupto; //time left in millisec
 	
 	private Location validat; //at what location it is valid at
 	
@@ -49,16 +49,16 @@ public class Coupon {
 	public void setProduct(Product product) {
 		this.product = product;
 	}
-	public Date getExpiration() {
+	public String getExpiration() {
 		return expiration;
 	}
-	public void setExpiration(Date expiration) {
+	public void setExpiration(String expiration) {
 		this.expiration = expiration;
 	}
-	public Date getValidupto() {
+	public long getValidupto() {
 		return validupto;
 	}
-	public void setValidupto(Date validupto) {
+	public void setValidupto(long validupto) {
 		this.validupto = validupto;
 	}
 	public Location getValidat() {

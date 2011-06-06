@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 
 import com.lumlate.midas.coupon.Coupon;
 import com.lumlate.midas.coupon.CouponBuilder;
+import com.lumlate.midas.db.TempOP;
 import com.lumlate.midas.email.Email;
 import com.lumlate.midas.email.EmailParser;
 import com.lumlate.midas.ml.EmailClassifier;
@@ -56,14 +57,12 @@ public class InboxReader {
 			//SearchTerm st=new RecipientStringTerm(Message.RecipientType.TO, "lumlatedeals@gmail.com");
 			//Message message[]=folder.search(st);
 			Message message[] = folder.search(ft);
-
 		    for(int i=0;i<message.length;i++){
 				this.parser.setMsg(message[i]);
 				//message[i].setFlag(Flags.Flag.SEEN, true);
-				
 				Email email = this.parser.parser(message[i]);
 				HtmlParser htmlparser = new HtmlParser();
-				
+				if(email.getContent()==null)continue;
 				boolean parseflag=false; // for tracking if the parsing was successfull
 				if(email.isIs_html() && !email.getContent().isEmpty()){
 					parseflag=true;
@@ -89,21 +88,11 @@ public class InboxReader {
 				if(category.equalsIgnoreCase("deal") || category.equalsIgnoreCase("subscription")){ //TODO convert category from string to enum
 					try {
 						Coupon coupon=cb.BuildCoupon(email);
-						if(coupon!=null){/*
-							System.out.println("-------------------------------------------------------");
-							System.out.println(email.getCategory());
-							System.out.println(email.getFromemail());
-							System.out.println(email.getFromname());
-							System.out.println(email.getSubject());
-							System.out.println(email.getTo());
-							System.out.println(email.getRecieveddate());
-							System.out.println(coupon.getDealvalue());
-							System.out.println(coupon.getSalepercentage());
-							System.out.println(coupon.getRetailer().getDomain());
-							System.out.println(coupon.getRetailer().getName());
-							System.out.println(coupon.getRetailer().getSubscription_email().toString());
-							System.out.println("-------------------------------------------------------");
-							*/
+						if(coupon!=null){
+							TempOP tempop=new TempOP();
+							tempop.setCoupon(coupon);
+							tempop.setEmail(email);
+							System.out.println(gson.toJson(tempop));
 							message[i].setFlag(Flags.Flag.SEEN, true);
 						}
 					} catch (Throwable e) {
@@ -111,7 +100,7 @@ public class InboxReader {
 					}
 				}
 				else{
-					System.out.println("NOT CATEGORIZED "+email.getSubject());
+					//System.out.println("NOT CATEGORIZED "+email.getSubject());
 				}
 			  }
 //TODO		persist email // can and probably should be asynchronous using a queue
