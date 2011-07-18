@@ -22,7 +22,7 @@ import com.lumlate.midas.ml.EmailClassifier;
 import com.lumlate.midas.utils.HtmlParser;
 import com.lumlate.midas.utils.UrlParser;
 
-public class InboxReader {
+public class CopyOfEmailProcessor {
 	private String username;
 	private String password;
 	private String receivingHost;
@@ -33,8 +33,7 @@ public class InboxReader {
 	private String dateregexfile;
 	
 	public void readImapInbox(String imaphost,String imapport,String connectiontimeout,String imaptimeout){
-		CouponBuilder cb=new CouponBuilder(this.dealregexfile,this.dateregexfile);
-		
+		CouponBuilder cb=new CouponBuilder(this.dealregexfile,this.dateregexfile);		
 		Properties props=System.getProperties();
 		//props.setProperty("mail.store.protocol", "imap");  //for lumlate mail server
 		props.setProperty("mail.store.protocol", "imaps");   //for gmail
@@ -46,9 +45,9 @@ public class InboxReader {
 		props.setProperty("mail.imap.socketFactory.fallback", "false");
 		Gson gson = new Gson();
 		Session session=Session.getDefaultInstance(props, null);
+		
 		try {
 			//Store store=session.getStore("imap"); //for lumlate email server
-			
 			Store store=session.getStore("imaps");  //for gmail.com
 			store.connect(this.receivingHost,this.username, this.password);
 			Folder folder=store.getFolder("INBOX");//get inbox
@@ -153,7 +152,7 @@ public class InboxReader {
 	}
 
 	public static void main(String[] args) {
-		InboxReader newGmailClient=new InboxReader();
+		CopyOfEmailProcessor newGmailClient=new CopyOfEmailProcessor();
 		/*
 		newGmailClient.setUsername("lumlatedeals@lumlate.com");
 		newGmailClient.setPassword("latelumdeals");

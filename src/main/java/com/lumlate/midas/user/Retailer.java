@@ -1,5 +1,6 @@
 package com.lumlate.midas.user;
 
+import java.util.Date;
 import java.util.HashSet;
 
 import javax.mail.internet.InternetAddress;
@@ -8,15 +9,18 @@ import com.lumlate.midas.meta.Vertical;
 
 public class Retailer {
 
-	public String name;
+	private long id;
 	private String domain;
-	public InternetAddress subscription_email;
+	private String name;
+	private String image;
+	private Date createdAT;
+	private Date updatedAT;
 	
-	public String getName() {
-		return name;
+	public long getId() {
+		return id;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setId(long id) {
+		this.id = id;
 	}
 	public String getDomain() {
 		return domain;
@@ -24,10 +28,29 @@ public class Retailer {
 	public void setDomain(String domain) {
 		this.domain = domain;
 	}
-	public InternetAddress getSubscription_email() {
-		return subscription_email;
+	public String getName() {
+		return name;
 	}
-	public void setSubscription_email(InternetAddress subscription_email) {
-		this.subscription_email = subscription_email;
+	public void setName(String name) {
+		this.name = name;
 	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
+	public Date getCreatedAT() {
+		return createdAT;
+	}
+	public void setCreatedAT(Date createdAT) {
+		this.createdAT = createdAT;
+	}
+	public Date getUpdatedAT() {
+		return updatedAT;
+	}
+	public void setUpdatedAT(Date updatedAT) {
+		this.updatedAT = updatedAT;
+	}
+
 }

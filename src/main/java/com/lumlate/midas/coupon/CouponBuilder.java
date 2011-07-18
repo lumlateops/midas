@@ -180,7 +180,7 @@ public class CouponBuilder {
 			}
 		}
 		if(email.getFromemail()!=null){
-			retailer.setSubscription_email(new InternetAddress(email.getFromemail()));
+			//retailer.setSubscription_email(new InternetAddress(email.getFromemail()));
 		}
 		coupon.setRetailer(retailer);
 		return coupon;
