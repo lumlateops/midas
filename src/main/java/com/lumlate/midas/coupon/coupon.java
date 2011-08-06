@@ -5,11 +5,11 @@ import java.util.Date;
 import com.lumlate.midas.location.Location;
 import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
-import com.lumlate.midas.user.Retailer;
+import com.lumlate.midas.user.Retailers;
 
 public class Coupon {
 	
-	private Retailer retailer;
+	private Retailers retailer;
 	private Consumer consumer;
 	
 	private int dealvalue;
@@ -25,10 +25,10 @@ public class Coupon {
 	private boolean is_free_shipping;
 	
 	
-	public Retailer getRetailer() {
+	public Retailers getRetailer() {
 		return retailer;
 	}
-	public void setRetailer(Retailer retailer) {
+	public void setRetailer(Retailers retailer) {
 		this.retailer = retailer;
 	}
 	public int getDealvalue() {

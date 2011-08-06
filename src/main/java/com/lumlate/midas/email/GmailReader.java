@@ -15,6 +15,8 @@ package com.lumlate.midas.email;
  * limitations under the License.
  */
 
+import com.lumlate.midas.db.RetailersORM;
+import com.lumlate.midas.utils.MySQLAccess;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -32,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.mail.Flags;
@@ -40,7 +43,9 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.mail.search.FlagTerm;
-
+import javax.mail.search.FromStringTerm;
+import javax.mail.search.OrTerm;
+import javax.mail.search.SearchTerm;
 
 /**
  * Performs XOAUTH authentication.
@@ -64,6 +69,7 @@ public class GmailReader {
 	 */
 	public static OAuthConsumer getAnonymousConsumer() {
 		return new OAuthConsumer(null, "anonymous", "anonymous", null);
+		//return new OAuthConsumer(null, "deallr.com", "f_yk4d2GkQljJ38JQrcRJBPr", null);
 	}
 
 	/**
@@ -181,28 +187,45 @@ public class GmailReader {
 	 */
 	public static void main(String args[]) throws Exception {
 
+		String mysqlhost="localhost";
+		String mysqlport="3306";
+		String mysqluser="lumlate";
+		String mysqlpassword="lumlate$";
+		String database="lumlate";
 		String email = "lumlatedeals@gmail.com";
 		String oauthToken = "1/tLS_lJLsE6TyPUD6_Z1WnjFoEKJgmAHZjXU1RDHh3VY";
 		String oauthTokenSecret = "nq5U3HXmnWLmSJdyULZMUa_9";
+		
 		String TASK_QUEUE_NAME="gmail_oauth";
 		String rmqserver="rmq01.deallr.com";
-		
+
 		initialize();
 		IMAPSSLStore imapSslStore = connectToImap("imap.googlemail.com",993,email,oauthToken,oauthTokenSecret,getAnonymousConsumer(),true);
-		
-	    ConnectionFactory factory = new ConnectionFactory();
-	    factory.setHost(rmqserver);
-	    Connection connection = factory.newConnection();
-	    Channel channel = connection.createChannel();
 
-	    channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(rmqserver);
+		Connection connection = factory.newConnection();
+		Channel channel = connection.createChannel();
+
+		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 
 		Folder folder=imapSslStore.getFolder("INBOX");//get inbox
 		folder.open(Folder.READ_WRITE);//open folder only to read
 		FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
-		//SearchTerm st=new RecipientStringTerm(Message.RecipientType.TO, "lumlatedeals@gmail.com");
-		//Message message[]=folder.search(st);
-		Message message[] = folder.search(ft);
+		
+		MySQLAccess myaccess = new MySQLAccess(mysqlhost,mysqlport,mysqluser,mysqlpassword,database);
+		RetailersORM retailorm = new RetailersORM();
+		retailorm.setStmt(myaccess.getStmt());
+		LinkedList<String>retaildomains=retailorm.getallRetailerDomains();
+		LinkedList<SearchTerm> searchterms = new LinkedList<SearchTerm>();
+		for(String retaildomain:retaildomains){
+			SearchTerm retailsearchterm=new FromStringTerm(retaildomain);
+			searchterms.add(retailsearchterm);
+		}
+		SearchTerm[] starray= new SearchTerm[searchterms.size()];
+		searchterms.toArray(starray);
+		SearchTerm st=new OrTerm(starray); //add date to this as well so that fetch is since last time
+		Message message[]=folder.search(st);
 		for(int i=0;i<message.length;i++){
 			Message msg = message[i];
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -211,9 +234,9 @@ public class GmailReader {
 			//out.writeObject(bos);
 			//out.close();
 			byte[] buf = bos.toByteArray();
-		    channel.basicPublish("", TASK_QUEUE_NAME,MessageProperties.PERSISTENT_TEXT_PLAIN,buf);
+			channel.basicPublish("", TASK_QUEUE_NAME,MessageProperties.PERSISTENT_TEXT_PLAIN,buf);
 		}
-	    channel.close();
-	    connection.close();
+		channel.close();
+		connection.close();
 	}
 }

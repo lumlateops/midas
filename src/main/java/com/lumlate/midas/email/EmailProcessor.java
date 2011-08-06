@@ -32,7 +32,7 @@ public class EmailProcessor {
 	private String dateregexfile;
 
 	public void readImapInbox(Session session) throws Exception{
-		CouponBuilder cb=new CouponBuilder(this.dealregexfile,this.dateregexfile);		
+		CouponBuilder cb=new CouponBuilder(dealregexfile,dateregexfile);		
 		Gson gson = new Gson();
 		String rmqserver="rmq01.deallr.com";
 		String TASK_QUEUE_NAME="gmail_oauth";
@@ -139,14 +139,14 @@ public class EmailProcessor {
 		EmailProcessor newGmailClient=new EmailProcessor();
 		Properties props=System.getProperties();
 		Session session=Session.getDefaultInstance(props, null);
+		newGmailClient.setDealregexfile(args[0]);
+		newGmailClient.setDateregexfile(args[1]);
 		try {
 			newGmailClient.readImapInbox(session);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//newGmailClient.setDealregexfile(args[0]);
-		//newGmailClient.setDateregexfile(args[1]);
 	}
 
 }

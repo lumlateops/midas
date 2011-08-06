@@ -3,14 +3,15 @@ package com.lumlate.midas.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
 import java.util.Vector;
 
-import com.lumlate.midas.user.Retailer;
+import com.lumlate.midas.user.Retailers;
 
 public class RetailersORM {
-	private Vector<Retailer> retailers;
+	private Vector<Retailers> retailers;
 	private Statement stmt;
-	private String table;
+	private String table="Retailers";
 
 	/***
 	public void Insert(Retailer retailer) throws Exception{
@@ -33,7 +34,7 @@ public class RetailersORM {
 	}
 	***/
 
-	public Retailer getRetailer(String domain){
+	public Retailers getRetailer(String domain){
 		String str="Select * from "+table+" where domain="+domain;
 		try{
 			ResultSet s=stmt.executeQuery(str);
@@ -42,6 +43,20 @@ public class RetailersORM {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public LinkedList<String> getallRetailerDomains(){
+		String str="Select domain from "+table;
+		LinkedList<String> retaildomains=new LinkedList<String>();
+		try{
+			ResultSet s=stmt.executeQuery(str);
+			while(s.next()){
+				retaildomains.add(s.getString("domain"));
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return retaildomains;
 	}
 	
 	public Statement getStmt() {

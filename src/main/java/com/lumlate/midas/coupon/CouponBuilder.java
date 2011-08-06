@@ -20,7 +20,7 @@ import javax.mail.internet.InternetAddress;
 import com.lumlate.midas.email.Email;
 import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
-import com.lumlate.midas.user.Retailer;
+import com.lumlate.midas.user.Retailers;
 import com.google.gson.*;
 
 public class CouponBuilder {
@@ -172,7 +172,7 @@ public class CouponBuilder {
 	}
 	
 	private Coupon ExtractRetailer(Email email,Coupon coupon) throws Exception {
-		Retailer retailer=new Retailer();
+		Retailers retailer=new Retailers();
 		if(email.getFromemail()!=null){
 			retailer.setDomain(email.getFromemail());
 			if(email.getFromname()!=null){

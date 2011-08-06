@@ -7,7 +7,7 @@ import javax.mail.internet.InternetAddress;
 
 import com.lumlate.midas.meta.Vertical;
 
-public class Retailer {
+public class Retailers {
 
 	private long id;
 	private String domain;

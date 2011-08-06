@@ -1,16 +1,16 @@
 package com.lumlate.midas.meta;
 
-import com.lumlate.midas.user.Retailer;
+import com.lumlate.midas.user.Retailers;
 
 public class Subscription {
-	private Retailer retailer;
+	private Retailers retailer;
 	private Vertical vertical;
 	private String subscription_email;
 	
-	public Retailer getRetailer() {
+	public Retailers getRetailer() {
 		return retailer;
 	}
-	public void setRetailer(Retailer retailer) {
+	public void setRetailer(Retailers retailer) {
 		this.retailer = retailer;
 	}
 	public Vertical getVertical() {
