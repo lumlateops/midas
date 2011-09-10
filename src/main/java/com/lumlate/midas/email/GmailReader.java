@@ -15,25 +15,20 @@ package com.lumlate.midas.email;
  * limitations under the License.
  */
 
+import com.google.code.samples.XoauthSaslClientFactory;
 import com.lumlate.midas.db.RetailersORM;
 import com.lumlate.midas.utils.MySQLAccess;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.MessageProperties;
-import com.rabbitmq.client.QueueingConsumer;
 import com.sun.mail.imap.IMAPSSLStore;
-import com.sun.mail.smtp.SMTPTransport;
-import com.sun.mail.util.BASE64EncoderStream;
 
 import net.oauth.OAuthConsumer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.security.Provider;
 import java.security.Security;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Properties;
 
@@ -49,17 +44,18 @@ import javax.mail.search.SearchTerm;
 
 /**
  * Performs XOAUTH authentication.
- *
- * <p>Before using this class, you must call {@code initialize} to install the
+ * 
+ * <p>
+ * Before using this class, you must call {@code initialize} to install the
  * XOAUTH SASL provider.
  */
 public class GmailReader {
 	public static final class XoauthProvider extends Provider {
 		public XoauthProvider() {
 			super("Google Xoauth Provider", 1.0,
-			"Provides the Xoauth experimental SASL Mechanism");
+					"Provides the Xoauth experimental SASL Mechanism");
 			put("SaslClientFactory.XOAUTH",
-			"com.lumlate.midas.email.XoauthSaslClientFactory");
+					"com.google.code.samples.XoauthSaslClientFactory");
 		}
 	}
 
@@ -69,12 +65,12 @@ public class GmailReader {
 	 */
 	public static OAuthConsumer getAnonymousConsumer() {
 		return new OAuthConsumer(null, "anonymous", "anonymous", null);
-		//return new OAuthConsumer(null, "deallr.com", "f_yk4d2GkQljJ38JQrcRJBPr", null);
+		 //return new OAuthConsumer(null, "deallr.com","f_yk4d2GkQljJ38JQrcRJBPr", null);
 	}
 
 	/**
-	 * Installs the XOAUTH SASL provider. This must be called exactly once before
-	 * calling other methods on this class.
+	 * Installs the XOAUTH SASL provider. This must be called exactly once
+	 * before calling other methods on this class.
 	 */
 	public static void initialize() {
 		Security.addProvider(new XoauthProvider());
@@ -83,32 +79,35 @@ public class GmailReader {
 	/**
 	 * Connects and authenticates to an IMAP server with XOAUTH. You must have
 	 * called {@code initialize}.
-	 *
-	 * @param host Hostname of the imap server, for example {@code
-	 *     imap.googlemail.com}.
-	 * @param port Port of the imap server, for example 993.
-	 * @param userEmail Email address of the user to authenticate, for example
-	 *     {@code xoauth@gmail.com}.
-	 * @param oauthToken The user's OAuth token.
-	 * @param oauthTokenSecret The user's OAuth token secret.
-	 * @param consumer The application's OAuthConsumer. For testing, use
-	 *     {@code getAnonymousConsumer()}.
-	 * @param debug Whether to enable debug logging on the IMAP connection.
-	 *
-	 * @return An authenticated IMAPSSLStore that can be used for IMAP operations.
+	 * 
+	 * @param host
+	 *            Hostname of the imap server, for example
+	 *            {@code imap.googlemail.com}.
+	 * @param port
+	 *            Port of the imap server, for example 993.
+	 * @param userEmail
+	 *            Email address of the user to authenticate, for example
+	 *            {@code xoauth@gmail.com}.
+	 * @param oauthToken
+	 *            The user's OAuth token.
+	 * @param oauthTokenSecret
+	 *            The user's OAuth token secret.
+	 * @param consumer
+	 *            The application's OAuthConsumer. For testing, use
+	 *            {@code getAnonymousConsumer()}.
+	 * @param debug
+	 *            Whether to enable debug logging on the IMAP connection.
+	 * 
+	 * @return An authenticated IMAPSSLStore that can be used for IMAP
+	 *         operations.
 	 */
-	public static IMAPSSLStore connectToImap(String host,
-			int port,
-			String userEmail,
-			String oauthToken,
-			String oauthTokenSecret,
-			OAuthConsumer consumer,
-			boolean debug) throws Exception {
+	public static IMAPSSLStore connectToImap(String host, int port,
+			String userEmail, String oauthToken, String oauthTokenSecret,
+			OAuthConsumer consumer, boolean debug) throws Exception {
 		Properties props = new Properties();
 		props.put("mail.imaps.sasl.enable", "true");
 		props.put("mail.imaps.sasl.mechanisms", "XOAUTH");
-		props.put(XoauthSaslClientFactory.OAUTH_TOKEN_PROP,
-				oauthToken);
+		props.put(XoauthSaslClientFactory.OAUTH_TOKEN_PROP, oauthToken);
 		props.put(XoauthSaslClientFactory.OAUTH_TOKEN_SECRET_PROP,
 				oauthTokenSecret);
 		props.put(XoauthSaslClientFactory.CONSUMER_KEY_PROP,
@@ -128,59 +127,55 @@ public class GmailReader {
 	/**
 	 * Connects and authenticates to an SMTP server with XOAUTH. You must have
 	 * called {@code initialize}.
-	 *
-	 * @param host Hostname of the smtp server, for example {@code
-	 *     smtp.googlemail.com}.
-	 * @param port Port of the smtp server, for example 587.
-	 * @param userEmail Email address of the user to authenticate, for example
-	 *     {@code xoauth@gmail.com}.
-	 * @param oauthToken The user's OAuth token.
-	 * @param oauthTokenSecret The user's OAuth token secret.
-	 * @param consumer The application's OAuthConsumer. For testing, use
-	 *     {@code getAnonymousConsumer()}.
-	 * @param debug Whether to enable debug logging on the connection.
-	 *
+	 * 
+	 * @param host
+	 *            Hostname of the smtp server, for example
+	 *            {@code smtp.googlemail.com}.
+	 * @param port
+	 *            Port of the smtp server, for example 587.
+	 * @param userEmail
+	 *            Email address of the user to authenticate, for example
+	 *            {@code xoauth@gmail.com}.
+	 * @param oauthToken
+	 *            The user's OAuth token.
+	 * @param oauthTokenSecret
+	 *            The user's OAuth token secret.
+	 * @param consumer
+	 *            The application's OAuthConsumer. For testing, use
+	 *            {@code getAnonymousConsumer()}.
+	 * @param debug
+	 *            Whether to enable debug logging on the connection.
+	 * 
 	 * @return An authenticated SMTPTransport that can be used for SMTP
-	 *     operations.
+	 *         operations.
 	 */
 	/*
- public static SMTPTransport connectToSmtp(String host,
-                                           int port,
-                                           String userEmail,
-                                           String oauthToken,
-                                           String oauthTokenSecret,
-                                           OAuthConsumer consumer,
-                                           boolean debug) throws Exception {
-   Properties props = new Properties();
-   props.put("mail.smtp.ehlo", "true");
-   props.put("mail.smtp.auth", "false");
-   props.put("mail.smtp.starttls.enable", "true");
-   props.put("mail.smtp.starttls.required", "true");
-   props.put("mail.smtp.sasl.enable", "false");
-   Session session = Session.getInstance(props);
-   session.setDebug(debug);
-
-   final URLName unusedUrlName = null;
-   SMTPTransport transport = new SMTPTransport(session, unusedUrlName);
-   // If the password is non-null, SMTP tries to do AUTH LOGIN.
-   final String emptyPassword = null;
-   transport.connect(host, port, userEmail, emptyPassword);
-
-   /*
-	 * I couldn't get the SASL infrastructure to work with JavaMail 1.4.3;
-	 * I don't think it was ready yet in that release. So we'll construct the
-	 * AUTH command manually.
-
-   XoauthSaslResponseBuilder builder = new XoauthSaslResponseBuilder();
-   byte[] saslResponse = builder.buildResponse(userEmail,
-                                               XoauthProtocol.SMTP,
-                                               oauthToken,
-                                               oauthTokenSecret,
-                                               consumer);
-   saslResponse = BASE64EncoderStream.encode(saslResponse);
-   transport.issueCommand("AUTH XOAUTH " + new String(saslResponse),235);
-   return transport;
- }*/
+	 * public static SMTPTransport connectToSmtp(String host, int port, String
+	 * userEmail, String oauthToken, String oauthTokenSecret, OAuthConsumer
+	 * consumer, boolean debug) throws Exception { Properties props = new
+	 * Properties(); props.put("mail.smtp.ehlo", "true");
+	 * props.put("mail.smtp.auth", "false");
+	 * props.put("mail.smtp.starttls.enable", "true");
+	 * props.put("mail.smtp.starttls.required", "true");
+	 * props.put("mail.smtp.sasl.enable", "false"); Session session =
+	 * Session.getInstance(props); session.setDebug(debug);
+	 * 
+	 * final URLName unusedUrlName = null; SMTPTransport transport = new
+	 * SMTPTransport(session, unusedUrlName); // If the password is non-null,
+	 * SMTP tries to do AUTH LOGIN. final String emptyPassword = null;
+	 * transport.connect(host, port, userEmail, emptyPassword);
+	 * 
+	 * /* I couldn't get the SASL infrastructure to work with JavaMail 1.4.3; I
+	 * don't think it was ready yet in that release. So we'll construct the AUTH
+	 * command manually.
+	 * 
+	 * XoauthSaslResponseBuilder builder = new XoauthSaslResponseBuilder();
+	 * byte[] saslResponse = builder.buildResponse(userEmail,
+	 * XoauthProtocol.SMTP, oauthToken, oauthTokenSecret, consumer);
+	 * saslResponse = BASE64EncoderStream.encode(saslResponse);
+	 * transport.issueCommand("AUTH XOAUTH " + new String(saslResponse),235);
+	 * return transport; }
+	 */
 
 	/**
 	 * Authenticates to IMAP with parameters passed in on the commandline.
@@ -192,16 +187,21 @@ public class GmailReader {
 		String mysqluser="lumlate";
 		String mysqlpassword="lumlate$";
 		String database="lumlate";
-		String email = "lumlatedeals@gmail.com";
-		String oauthToken = "1/tLS_lJLsE6TyPUD6_Z1WnjFoEKJgmAHZjXU1RDHh3VY";
-		String oauthTokenSecret = "nq5U3HXmnWLmSJdyULZMUa_9";
 		
+		String email = "sharmavipul@gmail.com";
+		String oauthToken = "1/h1u_K6kgi6rnL4z00dCW6y-vkGy-8im-G3bVaETJKBQ";
+		String oauthTokenSecret = "3sp5dlRElbR1ZmTvvZ7b3fdJ";
+		/*
+		String email = "sharmavipul@gmail.com";
+		String oauthToken = "1/2Qt9NwPBHi4SicISYpTw9_VXHFfpAr-kBencUV71YTQ";
+		String oauthTokenSecret = "v57fxlZIo1v_O69wJreGQsk_";*/
 		String TASK_QUEUE_NAME="gmail_oauth";
 		String rmqserver="rmq01.deallr.com";
-
+		
 		initialize();
-		IMAPSSLStore imapSslStore = connectToImap("imap.googlemail.com",993,email,oauthToken,oauthTokenSecret,getAnonymousConsumer(),true);
-
+		String callback = "http://dev.deallr.com/account/upgradeEmailToken/" + "4" + "/gmail/" + "sharmavipul@gmail.com";
+		//IMAPSSLStore imapSslStore = connectToImap("imap.googlemail.com",993,email,oauthToken,oauthTokenSecret, new OAuthConsumer(callback, "deallr.com", "f_yk4d2GkQljJ38JQrcRJBPr", null),true);
+		IMAPSSLStore imapSslStore = connectToImap("imap.googlemail.com",993,email,oauthToken,oauthTokenSecret,getAnonymousConsumer() ,true);
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(rmqserver);
 		Connection connection = factory.newConnection();
@@ -236,6 +236,7 @@ public class GmailReader {
 			byte[] buf = bos.toByteArray();
 			channel.basicPublish("", TASK_QUEUE_NAME,MessageProperties.PERSISTENT_TEXT_PLAIN,buf);
 		}
+		myaccess.Dissconnect();
 		channel.close();
 		connection.close();
 	}

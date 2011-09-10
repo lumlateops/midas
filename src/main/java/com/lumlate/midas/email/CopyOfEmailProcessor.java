@@ -31,7 +31,7 @@ public class CopyOfEmailProcessor {
 	private UrlParser urlparser = new UrlParser();
 	private String dealregexfile;
 	private String dateregexfile;
-	
+
 	public void readImapInbox(String imaphost,String imapport,String connectiontimeout,String imaptimeout){
 		CouponBuilder cb=new CouponBuilder(this.dealregexfile,this.dateregexfile);		
 		Properties props=System.getProperties();
