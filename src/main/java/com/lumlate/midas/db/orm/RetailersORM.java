@@ -1,4 +1,4 @@
-package com.lumlate.midas.db;
+package com.lumlate.midas.db.orm;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

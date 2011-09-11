@@ -18,8 +18,8 @@ package com.lumlate.midas.email;
 import com.google.code.samples.XoauthAuthenticator;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 
-import com.lumlate.midas.db.RetailersORM;
-import com.lumlate.midas.utils.MySQLAccess;
+import com.lumlate.midas.db.MySQLAccess;
+import com.lumlate.midas.db.orm.RetailersORM;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;

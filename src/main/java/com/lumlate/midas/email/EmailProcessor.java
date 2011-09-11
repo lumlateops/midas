@@ -88,9 +88,7 @@ public class EmailProcessor {
 					try {
 						Coupon coupon=cb.BuildCoupon(email);
 						if(coupon!=null){
-							TempOP tempop=new TempOP();
-							tempop.setCoupon(coupon);
-							tempop.setEmail(email);
+							
 							System.out.println(gson.toJson(tempop));
 							//msg.setFlag(Flags.Flag.SEEN, true);
 						}

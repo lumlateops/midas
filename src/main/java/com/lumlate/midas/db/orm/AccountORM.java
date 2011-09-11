@@ -1,6 +1,8 @@
-package com.lumlate.midas.db;
+package com.lumlate.midas.db.orm;
 
 import java.sql.Date;
+
+import com.lumlate.midas.email.Email;
 
 public class AccountORM {
 	private long id;
@@ -87,6 +89,11 @@ public class AccountORM {
 	}
 	public void setProvider_id(long provider_id) {
 		this.provider_id = provider_id;
+	}
+	public long getId(String email) {
+		return id;
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

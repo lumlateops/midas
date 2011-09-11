@@ -1,4 +1,4 @@
-package com.lumlate.midas.utils;
+package com.lumlate.midas.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

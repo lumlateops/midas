@@ -1,6 +1,7 @@
 package com.lumlate.midas.email;
 
-import java.util.Date;
+
+import java.sql.Date;
 
 import com.lumlate.midas.utils.HtmlParser;
 

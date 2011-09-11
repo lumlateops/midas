@@ -1,11 +1,11 @@
-package com.lumlate.midas.db;
+package com.lumlate.midas.db.orm;
 
 import java.sql.Date;
 
 public class DealEmailORM {
 
 	private long id;
-	private String category;
+	private long category;
 	private String content;
 	private Date dateReceived;
 	private String domainKey;
@@ -17,8 +17,8 @@ public class DealEmailORM {
 	private String spfResult;
 	private String subject;
 	private String toName;
-
-	public DealEmailORM(long id, String category, String content,
+	
+	public DealEmailORM(long id, long category, String content,
 			Date dateReceived, String domainKey, String fromEmail,
 			String fromName, String parsedContent, String senderIP,
 			Date sentDate, String spfResult, String subject, String toName) {
@@ -38,6 +38,10 @@ public class DealEmailORM {
 		this.toName = toName;
 	}
 
+	public DealEmailORM() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -46,11 +50,11 @@ public class DealEmailORM {
 		this.id = id;
 	}
 
-	public String getCategory() {
+	public long getCategory() {
 		return category;
 	}
 
-	public void setCategory(String category) {
+	public void setCategory(long category) {
 		this.category = category;
 	}
 
