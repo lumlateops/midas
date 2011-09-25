@@ -6,62 +6,87 @@ public class SubscriptionORM {
 
 	private long id;
 	private Boolean active;
-	private Date createdAt;
-	private Date updatedAt;
-	private long retailer_id;
+	private String createdAt;
+	private String updatedAt;
+	private long department_id;
 	private long AccountId;
-	public SubscriptionORM(long id, Boolean active, Date createdAt,
-			Date updatedAt, long retailer_id, long accountId) {
+
+	public SubscriptionORM(long id, Boolean active, String createdAt,
+			String updatedAt, long department_id, long accountId) {
 		super();
 		this.id = id;
 		this.active = active;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
-		this.retailer_id = retailer_id;
+		this.department_id = department_id;
 		AccountId = accountId;
 	}
+
 	public SubscriptionORM() {
 		// TODO Auto-generated constructor stub
 	}
+
 	public long getId() {
 		return id;
 	}
+
 	public void setId(long id) {
 		this.id = id;
 	}
+
 	public Boolean getActive() {
 		return active;
 	}
+
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
-	public Date getCreatedAt() {
+
+	public String getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
+
+	public void setCreatedAt(String string) {
+		this.createdAt = string;
 	}
-	public Date getUpdatedAt() {
+
+	public String getUpdatedAt() {
 		return updatedAt;
 	}
-	public void setUpdatedAt(Date updatedAt) {
+
+	public void setUpdatedAt(String updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public long getRetailer_id() {
-		return retailer_id;
+
+	public long getDepartment_id() {
+		return department_id;
 	}
-	public void setRetailer_id(long retailer_id) {
-		this.retailer_id = retailer_id;
+
+	public void setDepartment_id(long department_id) {
+		this.department_id = department_id;
 	}
+
 	public long getAccountId() {
 		return AccountId;
 	}
+
 	public void setAccountId(long accountId) {
 		AccountId = accountId;
 	}
+
 	public long getId(long accountid, long retailerid) {
 		return retailerid;
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	public void clear() {
+		id = 0;
+		active = false;
+		createdAt = null;
+		updatedAt = null;
+		department_id = 0;
+		AccountId = 0;
+
 	}
 }

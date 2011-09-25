@@ -2,14 +2,14 @@ package com.lumlate.midas.coupon;
 
 import java.util.Date;
 
+import com.lumlate.midas.db.orm.RetailersORM;
 import com.lumlate.midas.location.Location;
 import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
-import com.lumlate.midas.user.Retailers;
 
 public class Coupon {
 	
-	private Retailers retailer;
+	private RetailersORM retailer;
 	private Consumer consumer;
 	
 	private int dealvalue;
@@ -18,17 +18,17 @@ public class Coupon {
 	private Product product;
 	
 	private String expiration; //when there is a specifc date
-	private long validupto; //time left in millisec
+	private String validupto; //time left in millisec
 	
 	private Location validat; //at what location it is valid at
 	
 	private boolean is_free_shipping;
 	
 	
-	public Retailers getRetailer() {
+	public RetailersORM getRetailer() {
 		return retailer;
 	}
-	public void setRetailer(Retailers retailer) {
+	public void setRetailer(RetailersORM retailer) {
 		this.retailer = retailer;
 	}
 	public int getDealvalue() {
@@ -55,10 +55,10 @@ public class Coupon {
 	public void setExpiration(String expiration) {
 		this.expiration = expiration;
 	}
-	public long getValidupto() {
+	public String getValidupto() {
 		return validupto;
 	}
-	public void setValidupto(long validupto) {
+	public void setValidupto(String validupto) {
 		this.validupto = validupto;
 	}
 	public Location getValidat() {

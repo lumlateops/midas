@@ -1,6 +1,9 @@
 package com.lumlate.midas.email;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.*;
 
@@ -13,7 +16,8 @@ import com.google.gson.Gson;
 
 import com.lumlate.midas.coupon.Coupon;
 import com.lumlate.midas.coupon.CouponBuilder;
-import com.lumlate.midas.db.TempOP;
+import com.lumlate.midas.db.PersistData;
+import com.lumlate.midas.email.Email;
 import com.lumlate.midas.email.EmailParser;
 import com.lumlate.midas.ml.EmailClassifier;
 import com.lumlate.midas.utils.HtmlParser;
@@ -25,21 +29,33 @@ import com.rabbitmq.client.QueueingConsumer;
 
 public class EmailProcessor {
 	private String receivingHost;
-	private EmailParser parser=new EmailParser();
-	private EmailClassifier emailclassifier=new EmailClassifier();
+	private EmailParser parser = new EmailParser();
+	private EmailClassifier emailclassifier = new EmailClassifier();
 	private UrlParser urlparser = new UrlParser();
+	private PersistData persistdata;
 	private String dealregexfile;
 	private String dateregexfile;
+	private String rmqserver;
+	private String TASK_QUEUE_NAME;
+	private ConnectionFactory factory;
+	private Connection connection;
+	private Channel channel;
 
-	public void readImapInbox(Session session) throws Exception{
-		CouponBuilder cb=new CouponBuilder(dealregexfile,dateregexfile);		
+	public EmailProcessor(Properties props) throws Exception{
 		Gson gson = new Gson();
-		String rmqserver="rmq01.deallr.com";
-		String TASK_QUEUE_NAME="gmail_oauth";
-		ConnectionFactory factory = new ConnectionFactory();
+		rmqserver=props.getProperty("com.lumlate.midas.rmq.server");
+		TASK_QUEUE_NAME=props.getProperty("com.lumlate.midas.rmq.scheduler.queue","scheduler_queue");
+		factory = new ConnectionFactory();
 		factory.setHost(rmqserver);
-		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
+		factory.setUsername(props.getProperty("com.lumlate.midas.rmq.username"));
+		factory.setPassword(props.getProperty("com.lumlate.midas.rmq.password"));
+		connection = factory.newConnection();
+		channel = connection.createChannel();
+		persistdata=new PersistData(props.getProperty("com.lumlate.midas.mysql.host"), props.getProperty("com.lumlate.midas.mysql.port"), props.getProperty("com.lumlate.midas.mysql.user"), props.getProperty("com.lumlate.midas.mysql.password"), props.getProperty("com.lumlate.midas.mysql.database"));
+	}
+
+	public void readImapInbox(Session session) throws Exception {
+		CouponBuilder cb = new CouponBuilder(dealregexfile, dateregexfile);
 
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
@@ -50,60 +66,65 @@ public class EmailProcessor {
 
 		while (true) {
 			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-			ByteArrayInputStream in = new ByteArrayInputStream(delivery.getBody());
-			MimeMessage msg=new MimeMessage(session, in);
-			//Message msg = in.read();
-			
-			System.out.println(" [x] Received '" + msg.getSubject() + "'");
-			
+			ByteArrayInputStream in = new ByteArrayInputStream(
+					delivery.getBody());
+			MimeMessage msg = new MimeMessage(session, in);
+
 			try {
 				this.parser.setMsg(msg);
-				//message[i].setFlag(Flags.Flag.SEEN, true);
+				// message[i].setFlag(Flags.Flag.SEEN, true);
 				Email email = this.parser.parser(msg);
 				HtmlParser htmlparser = new HtmlParser();
-				if(email.getContent()==null)continue;
-				boolean parseflag=false; // for tracking if the parsing was successfull
-				if(email.isIs_html() && !email.getContent().isEmpty()){
-					parseflag=true;
+				if (email.getContent() == null)
+					continue;
+				boolean parseflag = false; // for tracking if the parsing was
+											// successfull
+				if (email.isIs_html() && !email.getContent().isEmpty()) {
+					parseflag = true;
 					htmlparser.parsehtml(email.getContent());
-				}else if(email.isIs_plaintext() && !email.getContent().isEmpty()){
-					parseflag=true;
+				} else if (email.isIs_plaintext()
+						&& !email.getContent().isEmpty()) {
+					parseflag = true;
 					htmlparser.setRawtext(email.getContent());
-				}else if(!email.getContent().isEmpty()){
-					parseflag=true;
+				} else if (!email.getContent().isEmpty()) {
+					parseflag = true;
 					htmlparser.parsehtml(email.getContent());
 				}
 
-				if(htmlparser!=null){
+				if (htmlparser != null) {
 					email.setHtml(htmlparser);
 				}
 
-				String category=this.emailclassifier.classifyEmail(email);
+				String category = this.emailclassifier.classifyEmail(email);
 
-				if(!category.isEmpty()){
+				if (!category.isEmpty()) {
 					email.setCategory(category);
 				}
-				//System.out.println(gson.toJson(email));
-				if(category.equalsIgnoreCase("deal") || category.equalsIgnoreCase("subscription")){ //TODO convert category from string to enum
+				// System.out.println(gson.toJson(email));
+				if (category.equalsIgnoreCase("deal")
+						|| category.equalsIgnoreCase("subscription")) { // TODO
+																		// convert
+																		// category
+																		// from
+																		// string
+																		// to
+																		// enum
 					try {
-						Coupon coupon=cb.BuildCoupon(email);
-						if(coupon!=null){
-							
-							System.out.println(gson.toJson(tempop));
-							//msg.setFlag(Flags.Flag.SEEN, true);
+						Coupon coupon = cb.BuildCoupon(email);
+						if (coupon != null) {
+							this.persistdata.setCoupon(coupon);
+							this.persistdata.setEmail(email);
+							this.persistdata.persist();
 						}
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
+				} else {
+					System.out.println("NOT CATEGORIZED " + email.getSubject());
 				}
-				else{
-					//System.out.println("NOT CATEGORIZED "+email.getSubject());
-				}
-				//TODO		persist email // can and probably should be asynchronous using a queue
 			} catch (Exception e) {
 				System.out.println(e.toString());
-				}
-			System.out.println(" [x] Done" );
+			}
 			channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 		}
 
@@ -134,9 +155,25 @@ public class EmailProcessor {
 	}
 
 	public static void main(String[] args) {
-		EmailProcessor newGmailClient=new EmailProcessor();
-		Properties props=System.getProperties();
-		Session session=Session.getDefaultInstance(props, null);
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream(args[2]));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		EmailProcessor newGmailClient = null;
+		try {
+			newGmailClient = new EmailProcessor(props);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Session session = Session.getDefaultInstance(props, null);
+		session.setDebug(true);
 		newGmailClient.setDealregexfile(args[0]);
 		newGmailClient.setDateregexfile(args[1]);
 		try {

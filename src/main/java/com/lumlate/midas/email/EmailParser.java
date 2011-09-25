@@ -1,6 +1,9 @@
 package com.lumlate.midas.email;
 
 import java.io.IOException;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,8 +16,10 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
+import com.google.gson.Gson;
 import com.lumlate.midas.ml.EmailClassifier;
 
 public class EmailParser {
@@ -24,6 +29,7 @@ public class EmailParser {
 	boolean is_text;
 	boolean is_html;
 	boolean is_attachment;
+	private static SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public EmailParser(){
 		this.is_text=false;
@@ -85,45 +91,50 @@ public class EmailParser {
 		Address[] from=msg.getFrom();
 		Address[] to=msg.getAllRecipients();
 		Email email=new Email();
-		//to
-		for(Address t:to){
-			if(t.toString().contains("lumlate")){//TODO dont hard code domain
-				email.setTo(t.toString());
-			}
-		}
-		//sender
-		String sender = null;
-		for(Address f:from){
-			sender=f.toString();
-		}//TODO use the last sender if multiple hops. verify that the list is sorted by hops?
-		Matcher matcher = this.frompattern.matcher(sender);
-		if(matcher.matches()){
-			email.setFromname(matcher.group(1));
-			email.setFromemail(matcher.group(2));
-		}
-		//date
-		email.setRecieveddate(msg.getReceivedDate());
-		email.setSentdate(msg.getSentDate());
-		//subject
 		email.setSubject(MimeUtility.decodeText(msg.getSubject()));
 
 		//headers
 		Enumeration<Header> e= msg.getAllHeaders();
 		while(e.hasMoreElements()){
 			Header h = e.nextElement();
+			//System.out.println(h.getName()+"\t"+h.getValue());
 			if(h.getName().equalsIgnoreCase("Received")){
 				String value=MimeUtility.decodeText(h.getValue());
-				if(value.startsWith("from")){
+				if(value.startsWith("From")){
 					Matcher rmatcher=this.receivedpattern.matcher(value);
 					if(rmatcher.matches()){
 						//get sender ip
 					}
 				}
 			}
+			if(h.getName().equalsIgnoreCase("From")){
+				String value=MimeUtility.decodeText(h.getValue());
+				Matcher rmatcher=this.frompattern.matcher(value);
+				if(rmatcher.matches()){
+					email.setFromname(rmatcher.group(1));
+					String fromemail = rmatcher.group(2).replace(">", "").replace("<", "");
+					email.setFromemail(fromemail);
+				}
+			}
+			if(h.getName().equalsIgnoreCase("Delivered-To")){
+				String value=MimeUtility.decodeText(h.getValue());
+				email.setToemail(value);
+			}
+			if(h.getName().equalsIgnoreCase("To")){
+				String value=MimeUtility.decodeText(h.getValue());
+				email.setToname(value);
+			}
 			if(h.getName().equalsIgnoreCase("Received-SPF")){
 				String value=MimeUtility.decodeText(h.getValue());
 				String[] temp=value.split(" ");
 				email.setSpf_result(temp[0]);
+			}
+			if(h.getName().equalsIgnoreCase("Date")){
+				MailDateFormat md=new MailDateFormat();
+				Date s = md.parse(h.getValue());
+				Date ss=new Date(s.getTime());
+				email.setRecieveddate(formatter.format(ss).toString());
+				email.setSentdate(formatter.format(ss).toString());
 			}
 		}		
 		

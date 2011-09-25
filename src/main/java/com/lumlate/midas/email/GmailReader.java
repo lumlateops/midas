@@ -17,6 +17,7 @@ package com.lumlate.midas.email;
 
 import com.google.code.samples.XoauthSaslClientFactory;
 import com.lumlate.midas.db.MySQLAccess;
+import com.lumlate.midas.db.dao.RetailersDAO;
 import com.lumlate.midas.db.orm.RetailersORM;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -37,6 +38,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.URLName;
+import javax.mail.search.AndTerm;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.FromStringTerm;
 import javax.mail.search.OrTerm;
@@ -187,6 +189,7 @@ public class GmailReader {
 		String mysqluser="lumlate";
 		String mysqlpassword="lumlate$";
 		String database="lumlate";
+		MySQLAccess myaccess = new MySQLAccess(mysqlhost,mysqlport,mysqluser,mysqlpassword,database);
 		
 		String email = "sharmavipul@gmail.com";
 		String oauthToken = "1/h1u_K6kgi6rnL4z00dCW6y-vkGy-8im-G3bVaETJKBQ";
@@ -211,12 +214,11 @@ public class GmailReader {
 
 		Folder folder=imapSslStore.getFolder("INBOX");//get inbox
 		folder.open(Folder.READ_WRITE);//open folder only to read
-		FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+		SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
 		
-		MySQLAccess myaccess = new MySQLAccess(mysqlhost,mysqlport,mysqluser,mysqlpassword,database);
-		RetailersORM retailorm = new RetailersORM();
-		retailorm.setStmt(myaccess.getStmt());
-		LinkedList<String>retaildomains=retailorm.getallRetailerDomains();
+		RetailersDAO retaildao = new RetailersDAO();
+		retaildao.setStmt(myaccess.getConn().createStatement());
+		LinkedList<String>retaildomains=retaildao.getallRetailerDomains();
 		LinkedList<SearchTerm> searchterms = new LinkedList<SearchTerm>();
 		for(String retaildomain:retaildomains){
 			SearchTerm retailsearchterm=new FromStringTerm(retaildomain);
@@ -224,15 +226,14 @@ public class GmailReader {
 		}
 		SearchTerm[] starray= new SearchTerm[searchterms.size()];
 		searchterms.toArray(starray);
-		SearchTerm st=new OrTerm(starray); //add date to this as well so that fetch is since last time
-		Message message[]=folder.search(st);
+		SearchTerm st=new OrTerm(starray); //TODO add date to this as well so that fetch is since last time
+		SearchTerm searchterm = new AndTerm(st,flagterm);
+		
+		Message message[]=folder.search(searchterm);
 		for(int i=0;i<message.length;i++){
 			Message msg = message[i];
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			msg.writeTo(bos);
-			//ObjectOutput out = new ObjectOutputStream(bos);
-			//out.writeObject(bos);
-			//out.close();
 			byte[] buf = bos.toByteArray();
 			channel.basicPublish("", TASK_QUEUE_NAME,MessageProperties.PERSISTENT_TEXT_PLAIN,buf);
 		}

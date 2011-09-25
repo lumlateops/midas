@@ -1,16 +1,16 @@
 package com.lumlate.midas.meta;
 
-import com.lumlate.midas.user.Retailers;
+import com.lumlate.midas.db.orm.RetailersORM;
 
 public class Subscription {
-	private Retailers retailer;
+	private RetailersORM retailer;
 	private Vertical vertical;
 	private String subscription_email;
 	
-	public Retailers getRetailer() {
+	public RetailersORM getRetailer() {
 		return retailer;
 	}
-	public void setRetailer(Retailers retailer) {
+	public void setRetailer(RetailersORM retailer) {
 		this.retailer = retailer;
 	}
 	public Vertical getVertical() {

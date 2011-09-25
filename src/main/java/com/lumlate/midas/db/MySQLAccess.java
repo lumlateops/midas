@@ -3,7 +3,6 @@ package com.lumlate.midas.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import com.mysql.jdbc.Driver;
 
 public class MySQLAccess {
@@ -15,7 +14,6 @@ public class MySQLAccess {
 	private String driver;
 	private Connection conn;
 	private String url;
-	private Statement stmt;
 	
 	public MySQLAccess(String host, String port, String user, String password, String database){
 		this.host=host;
@@ -31,12 +29,6 @@ public class MySQLAccess {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			this.stmt=Statement();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	public Connection Connect() throws Exception{
 	    Class.forName(driver).newInstance();
@@ -44,13 +36,12 @@ public class MySQLAccess {
 	}
 	
 	public void Dissconnect() throws SQLException{
-		this.stmt.close();
 		this.conn.close();
 	}
-	public Statement getStmt() {
-		return stmt;
+	public Connection getConn() {
+		return conn;
 	}
-	private Statement Statement() throws SQLException {
-		return this.conn.createStatement();
+	public void setConn(Connection conn) {
+		this.conn = conn;
 	}
 }

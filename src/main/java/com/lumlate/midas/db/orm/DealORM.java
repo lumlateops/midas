@@ -5,14 +5,14 @@ import java.sql.Date;
 public class DealORM {
 
 	private long id;
-	private Date createdAt;
+	private String createdAt;
 	private float dealValue;
 	private int discountPercentage;
 	private float originalValue;
-	private Date postDate;
+	private String postDate;
 	private String title;
-	private Date updatedAt;
-	private Date expiryDate;
+	private String updatedAt;
+	private String expiryDate;
 	private String url;
 	private String validTo;
 	private long subscription_id;
@@ -20,11 +20,8 @@ public class DealORM {
 	private long dealEmailId;
 	private boolean freeShipping;
 	private long locationId;
-	public DealORM(long id, Date createdAt, float dealValue,
-			int discountPercentage, float originalValue, Date postDate,
-			String title, Date updatedAt, Date expiryDate, String url,
-			String validTo, long subscription_id, long userInfoid,
-			long dealEmailId, boolean freeShipping, long locationId) {
+	
+	public DealORM() {
 		super();
 		this.id = id;
 		this.createdAt = createdAt;
@@ -43,19 +40,16 @@ public class DealORM {
 		this.freeShipping = freeShipping;
 		this.locationId = locationId;
 	}
-	public DealORM() {
-		// TODO Auto-generated constructor stub
-	}
 	public long getId() {
 		return id;
 	}
 	public void setId(long id) {
 		this.id = id;
 	}
-	public Date getCreatedAt() {
+	public String getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(Date createdAt) {
+	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
 	}
 	public float getDealValue() {
@@ -76,10 +70,10 @@ public class DealORM {
 	public void setOriginalValue(float originalValue) {
 		this.originalValue = originalValue;
 	}
-	public Date getPostDate() {
+	public String getPostDate() {
 		return postDate;
 	}
-	public void setPostDate(Date postDate) {
+	public void setPostDate(String postDate) {
 		this.postDate = postDate;
 	}
 	public String getTitle() {
@@ -88,16 +82,16 @@ public class DealORM {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public Date getUpdatedAt() {
+	public String getUpdatedAt() {
 		return updatedAt;
 	}
-	public void setUpdatedAt(Date date) {
-		this.updatedAt = date;
+	public void setUpdatedAt(String updatedAt) {
+		this.updatedAt = updatedAt;
 	}
-	public Date getExpiryDate() {
+	public String getExpiryDate() {
 		return expiryDate;
 	}
-	public void setExpiryDate(Date expiryDate) {
+	public void setExpiryDate(String expiryDate) {
 		this.expiryDate = expiryDate;
 	}
 	public String getUrl() {
@@ -141,6 +135,25 @@ public class DealORM {
 	}
 	public void setLocationId(long locationId) {
 		this.locationId = locationId;
+	}
+	public void clear() {
+		id=0;
+		createdAt=null;
+		dealValue=0;
+		discountPercentage=0;
+		originalValue=0;
+		postDate=null;
+		title=null;
+		updatedAt=null;
+		expiryDate=null;
+		url=null;
+		validTo=null;
+		subscription_id=0;
+		userInfoid=0;
+		dealEmailId=0;
+		freeShipping=false;
+		locationId=0;
+		
 	}
 
 }

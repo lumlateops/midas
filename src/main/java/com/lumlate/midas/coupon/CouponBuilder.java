@@ -17,17 +17,20 @@ import java.util.regex.Pattern;
 
 import javax.mail.internet.InternetAddress;
 
+import com.lumlate.midas.coupon.Coupon;
+import com.lumlate.midas.coupon.DateRegex;
+import com.lumlate.midas.coupon.DealRegex;
+import com.lumlate.midas.db.orm.RetailersORM;
 import com.lumlate.midas.email.Email;
 import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
-import com.lumlate.midas.user.Retailers;
 import com.google.gson.*;
 
 public class CouponBuilder {
 	private Gson gson = new Gson();	
 	HashMap<Pattern,DealRegex> dealpatternhash = new HashMap<Pattern,DealRegex>();
 	HashMap<Pattern,DateRegex> datepatternhash = new HashMap<Pattern,DateRegex>();
-	
+	SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	File dealregexfile;
 	File validregexfile;
 	BufferedReader dealregexreader;
@@ -141,23 +144,31 @@ public class CouponBuilder {
 				//System.out.println("------------------------------- "+index);
 				//System.out.println(this.datepatternhash.get(key));
 				String expdate=getExpirationDate(this.datepatternhash.get(key),matcher.group(Integer.parseInt(index)));
-				coupon.setExpiration(expdate);
+				if(this.datepatternhash.get(key).getIs_date()){
+					coupon.setExpiration(expdate);
+				}else{
+					coupon.setValidupto(expdate);
+				}
 			}
+		}
+		if(coupon.getExpiration()==null || coupon.getExpiration().isEmpty()){
+			long now=System.currentTimeMillis();
+			long weekfromnow=now+7*24*60*60*1000;
+			Date expirydate=new Date(weekfromnow);
+			coupon.setExpiration(dateFormat.format(expirydate));
 		}
 	}
 
 	private String getExpirationDate(DateRegex data, String value) throws Exception{
 		DateFormat formatter;
 		DateFormat newformatter=new SimpleDateFormat("yyyy-mm-dd 00:00:00");
-		if(value.isEmpty()){
+		if(!value.isEmpty()){
 			if(data.getIs_date()){
 				formatter = new SimpleDateFormat(data.getDesc());
 				 return newformatter.format((Date)formatter.parse(value));
 			}
-		}else{
-			return value;
 		}
-		return null;
+		return value;
 	}
 	
 	private void ExtractProduct() {
@@ -165,22 +176,24 @@ public class CouponBuilder {
 	
 	private Coupon ExtractConsumer(Email email, Coupon coupon) {
 		Consumer consumer=new Consumer();
-		if(email.getTo()!=null){
-			consumer.setEmail_address(email.getTo());
+		if(email.getToemail()!=null){
+			consumer.setEmail_address(email.getToemail());
 		}
 		return coupon;
 	}
 	
 	private Coupon ExtractRetailer(Email email,Coupon coupon) throws Exception {
-		Retailers retailer=new Retailers();
+		RetailersORM retailer=new RetailersORM();
 		if(email.getFromemail()!=null){
-			retailer.setDomain(email.getFromemail());
+			String[] addrs=email.getFromemail().split("@")[1].split("\\.");
+			String fromdomain="";
+			for(int i=addrs.length-2;i<=addrs.length-1;i++){
+				fromdomain+=addrs[i]+".";
+			}
+			retailer.setDomain(fromdomain.substring(0, fromdomain.length()-1));
 			if(email.getFromname()!=null){
 				retailer.setName(email.getFromname());
 			}
-		}
-		if(email.getFromemail()!=null){
-			//retailer.setSubscription_email(new InternetAddress(email.getFromemail()));
 		}
 		coupon.setRetailer(retailer);
 		return coupon;

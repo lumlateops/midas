@@ -1,16 +1,17 @@
 package com.lumlate.midas.email;
 
 
-import java.sql.Date;
+import java.util.Date;
 
 import com.lumlate.midas.utils.HtmlParser;
 
 public class Email {
 	private String fromname;
 	private String fromemail;
-	private String to;
-	private Date recieveddate;
-	private Date sentdate;
+	private String toemail;
+	private String toname;
+	private String recieveddate;
+	private String sentdate;
 	private String subject;
 	private String senderip;
 	private String spf_result;
@@ -34,12 +35,6 @@ public class Email {
 	}
 	public void setFromemail(String fromemail) {
 		this.fromemail = fromemail.toLowerCase();
-	}
-	public String getTo() {
-		return to;
-	}
-	public void setTo(String to) {
-		this.to = to.toLowerCase();
 	}
 	public String getSubject() {
 		return subject;
@@ -65,16 +60,16 @@ public class Email {
 	public void setDomainkey_status(String domainkey_status) {
 		this.domainkey_status = domainkey_status;
 	}
-	public Date getRecieveddate() {
+	public String getRecieveddate() {
 		return recieveddate;
 	}
-	public void setRecieveddate(Date recieveddate) {
+	public void setRecieveddate(String recieveddate) {
 		this.recieveddate = recieveddate;
 	}
-	public Date getSentdate() {
+	public String getSentdate() {
 		return sentdate;
 	}
-	public void setSentdate(Date sentdate) {
+	public void setSentdate(String sentdate) {
 		this.sentdate = sentdate;
 	}
 	public String getContent() {
@@ -119,4 +114,17 @@ public class Email {
 	public void setHtml(HtmlParser html) {
 		this.html = html;
 	}
+	public String getToemail() {
+		return toemail;
+	}
+	public void setToemail(String toemail) {
+		this.toemail = toemail;
+	}
+	public String getToname() {
+		return toname;
+	}
+	public void setToname(String toname) {
+		this.toname = toname;
+	}
+	
 }

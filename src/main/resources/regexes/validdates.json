@@ -1,10 +1,10 @@
-{"id":1, "pattern":"(?:.*)(\\d+\\/\\d+\\/\\d+)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"YYYY/MM/dd"}
-{"id":2, "pattern":"(?:.*)(\\d+{4}-\\d+{2}-\\d+{2})(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"YYYY-MM-dd"}
+{"id":1, "pattern":"(?:.*)(\\d+\\/\\d+\\/\\d+)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"yyyy/MM/dd"}
+{"id":2, "pattern":"(?:.*)(\\d+{4}-\\d+{2}-\\d+{2})(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"yyyy-MM-dd"}
 {"id":4, "pattern":"(?:.*)(\\d+ days)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"true","is_hour":"false","is_other":"false","desc":""}
 {"id":5, "pattern":"(?:.*)(\\d+ hours)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"false","is_hour":"true","is_other":"false","desc":""}
 {"id":6, "pattern":"(?:.*)(\\d+ weeks)(?:.*)","indexes":"1","is_date":"false","is_week":"true","is_day":"false","is_hour":"false","is_other":"false","desc":""}
 {"id":7, "pattern":"(?:.*)((january|febuary|march|april|may|june|july|august|september|october|november|december)\\s+\\d+)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"true","is_other":"false","desc":"MMM dd"}
 {"id":8, "pattern":"(?:.*)(\\d+\\s+(january|febuary|march|april|may|june|july|august|september|october|november|december))(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"true","is_other":"false","desc":"dd MMM"}
-{"id":9, "pattern":"(?:.*)(weekend)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"weekend","desc":""}
+{"id":9, "pattern":"(?:.*)(weekend)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"false","is_hour":"false","is_other":"weekend","desc":""}
 {"id":3, "pattern":"(?:.*)(sunday|monday|tuesday|wednesday|tursday|friday|saturday)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"false","is_hour":"false","is_other":"true","desc":"E"}
-{"id":10, "pattern":"(?:.*)(limited time only)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"true","desc":"limited"}
+{"id":10, "pattern":"(?:.*)(limited time only)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"false","is_hour":"false","is_other":"true","desc":""}
