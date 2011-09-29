@@ -48,11 +48,12 @@ public class CouponBuilder {
 		try {
 			ExtractDealValue(email.getSubject(),coupon);
 			ExtractExpirationDates(email.getHtml().getRawtext(),coupon);
-			this.ExtractRetailer(email, coupon); 
-			this.ExtractConsumer(email, coupon);
+			ExtractRetailer(email, coupon); 
+			ExtractConsumer(email, coupon);
 			//this.ExtractProduct();
 		} catch (Throwable e) {
 			e.printStackTrace();
+			return null;
 		}
 		return coupon;
 	}

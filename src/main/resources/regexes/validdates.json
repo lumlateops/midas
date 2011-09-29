@@ -1,4 +1,4 @@
-{"id":1, "pattern":"(?:.*)(\\d+\\/\\d+\\/\\d+)(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"yyyy/MM/dd"}
+{"id":1, "pattern":"(?:.*)(\\d+{4}\\/\\d+{2}\\/\\d+{2})(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"yyyy/MM/dd"}
 {"id":2, "pattern":"(?:.*)(\\d+{4}-\\d+{2}-\\d+{2})(?:.*)","indexes":"1","is_date":"true","is_week":"false","is_day":"false","is_hour":"false","is_other":"false","desc":"yyyy-MM-dd"}
 {"id":4, "pattern":"(?:.*)(\\d+ days)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"true","is_hour":"false","is_other":"false","desc":""}
 {"id":5, "pattern":"(?:.*)(\\d+ hours)(?:.*)","indexes":"1","is_date":"false","is_week":"false","is_day":"false","is_hour":"true","is_other":"false","desc":""}

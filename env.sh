@@ -1,0 +1,9 @@
+export HOME=/root
+export MIDAS_DIR=$HOME/midas
+export MIDAS_VERSION=current
+export MIDAS_HOME=$MIDAS_DIR/$MIDAS_VERSION
+export LIB=$MIDAS_HOME/lib
+export BIN=$MIDAS_HOME/bin
+export ETC=$MIDAS_HOME/etc
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+export PATH=$JAVA_HOME/bin:$PATH

@@ -27,7 +27,7 @@ public class SubscriptionDAO {
 				.prepareStatement(
 						"Insert IGNORE into "
 								+ this.table
-								+ " (accountId,createdAt,updatedAt,department_Id) values (?,?,?,?)",
+								+ " (accountId,createdAt,updatedAt,department_id) values (?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);
 		stmt.setLong(1, subscription.getAccountId());
 		stmt.setString(2, subscription.getCreatedAt());
@@ -40,7 +40,7 @@ public class SubscriptionDAO {
 			subscription.setId(generatedKeys.getLong(1));
 		} else {
 			throw new SQLException(
-					"Creating user failed, no generated key obtained.");
+					"Creating Subscription failed, no generated key obtained.");
 		}
 		// executeUpdate(query, Statement.RETURN_GENERATED_KEYS));
 		return subscription;

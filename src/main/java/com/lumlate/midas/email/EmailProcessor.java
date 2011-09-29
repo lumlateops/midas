@@ -40,11 +40,12 @@ public class EmailProcessor {
 	private ConnectionFactory factory;
 	private Connection connection;
 	private Channel channel;
-
+	private Gson gson;
+	
 	public EmailProcessor(Properties props) throws Exception{
-		Gson gson = new Gson();
+		gson = new Gson();
 		rmqserver=props.getProperty("com.lumlate.midas.rmq.server");
-		TASK_QUEUE_NAME=props.getProperty("com.lumlate.midas.rmq.scheduler.queue","scheduler_queue");
+		TASK_QUEUE_NAME=props.getProperty("com.lumlate.midas.rmq.scheduler.queue");
 		factory = new ConnectionFactory();
 		factory.setHost(rmqserver);
 		factory.setUsername(props.getProperty("com.lumlate.midas.rmq.username"));
@@ -102,19 +103,11 @@ public class EmailProcessor {
 				}
 				// System.out.println(gson.toJson(email));
 				if (category.equalsIgnoreCase("deal")
-						|| category.equalsIgnoreCase("subscription")) { // TODO
-																		// convert
-																		// category
-																		// from
-																		// string
-																		// to
-																		// enum
+						|| category.equalsIgnoreCase("subscription") || category.equalsIgnoreCase("other")) { 
 					try {
 						Coupon coupon = cb.BuildCoupon(email);
 						if (coupon != null) {
-							this.persistdata.setCoupon(coupon);
-							this.persistdata.setEmail(email);
-							this.persistdata.persist();
+							this.persistdata.persist(email, coupon);
 						}
 					} catch (Throwable e) {
 						e.printStackTrace();

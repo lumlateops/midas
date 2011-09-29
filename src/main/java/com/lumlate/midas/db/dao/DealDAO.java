@@ -27,7 +27,7 @@ public class DealDAO {
 				.prepareStatement(
 						"Insert into "
 								+ this.table
-								+ " (createdAt,dealEmailId,dealRead,dealValue,discountPercentage,expiryDate,freeShipping,locationId,originalValue,postDate,title,updatedAt,url,userId,validTo,subscription_id) " +
+								+ " (createdAt,dealEmail_id,dealRead,dealValue,discountPercentage,expiryDate,freeShipping,locationId,originalValue,postDate,title,updatedAt,url,userinfo_id,validTo,subscription_id) " +
 										"values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 		stmt.setString(1, deal.getCreatedAt());
 		stmt.setLong(2, deal.getDealEmailId());
@@ -52,7 +52,7 @@ public class DealDAO {
 			deal.setId(generatedKeys.getLong(1));
 		} else {
 			throw new SQLException(
-					"Creating user failed, no generated key obtained.");
+					"Creating Deal failed, no generated key obtained.");
 		}
 		// executeUpdate(query, Statement.RETURN_GENERATED_KEYS));
 		return deal;

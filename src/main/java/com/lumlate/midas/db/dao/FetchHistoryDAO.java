@@ -27,7 +27,7 @@ public class FetchHistoryDAO {
 				.prepareStatement(
 						"Insert into "
 								+ this.table
-								+ " (fetchEndTime,fetchErrorMessage,fetchStartTime,fetchStatus,sessionid,userid) values (?,?,?,?,?,?)",
+								+ " (fetchEndTime,fetchErrorMessage,fetchStartTime,fetchStatus,sessionid,userInfo_id) values (?,?,?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);
 		stmt.setString(1, fetchhistory.getFetchEndTime());
 		stmt.setString(2, fetchhistory.getFetchErrorMessage());
@@ -52,7 +52,7 @@ public class FetchHistoryDAO {
 		try {
 			stmt = this.access.getConn().prepareStatement(
 					"Select fetchEndTime,fetchStartTime from " + this.table
-							+ " where userid=? and fetchStatus=? limit 1",
+							+ " where userInfo_id=? and fetchStatus=? order by fetchEndTime desc limit 1",
 					Statement.RETURN_GENERATED_KEYS);
 			stmt.setLong(1, userId);
 			stmt.setString(2, "Success");

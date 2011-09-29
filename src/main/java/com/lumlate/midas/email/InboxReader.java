@@ -46,13 +46,6 @@ import javax.mail.search.OrTerm;
 import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 
-/**
- * Performs XOAUTH authentication.
- * 
- * <p>
- * Before using this class, you must call {@code initialize} to install the
- * XOAUTH SASL provider.
- */
 public class InboxReader {
 	private LinkedList<SearchTerm> searchterms;
 	public LinkedList<SearchTerm> getSearchterms() {
@@ -63,7 +56,7 @@ public class InboxReader {
 	}
 	
 	public void readInbox(Properties props,String protocol, String hostname, String username, String password, Date lastfetch) throws Exception{
-		String TASK_QUEUE_NAME = props.getProperty("com.lumlate.midas.scheduler.queue");
+		String TASK_QUEUE_NAME = props.getProperty("com.lumlate.midas.rmq.scheduler.queue");
 		String rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
 		String rmqusername=props.getProperty("com.lumlate.midas.rmq.username");
 		String rmqpassword=props.getProperty("com.lumlate.midas.rmq.password");
@@ -119,13 +112,13 @@ public class InboxReader {
 		Properties props = new Properties();
 		props.load(new FileInputStream(args[0]));
 		
-		String mysqlhost=props.getProperty("com.lumlate.midas.mysql.host", "localhost");
-		String dbport=props.getProperty("com.lumlate.midas.mysql.port", "3306");
-		String dbuser=props.getProperty("com.lumlate.midas.mysql.user", "lumlate");
-		String dbpassword=props.getProperty("com.lumlate.midas.mysql.password", "lumlate$");
-		String db=props.getProperty("com.lumlate.midas.mysql.database", "lumlate");
-		MySQLAccess myaccess = new MySQLAccess(mysqlhost, dbport, dbuser,
-				dbpassword, db);
+		String mysqlhost=props.getProperty("com.lumlate.midas.mysql.host");
+		String dbport=props.getProperty("com.lumlate.midas.mysql.port");
+		String dbuser=props.getProperty("com.lumlate.midas.mysql.user");
+		String dbpassword=props.getProperty("com.lumlate.midas.mysql.password");
+		String db=props.getProperty("com.lumlate.midas.mysql.database");
+		System.out.println(mysqlhost+" "+dbport+" "+dbuser+" "+dbpassword+" "+db);
+		MySQLAccess myaccess = new MySQLAccess(mysqlhost, dbport, dbuser,dbpassword, db);
 		
 		RetailersDAO retaildao = new RetailersDAO();
 		retaildao.setStmt(myaccess.getConn().createStatement());
@@ -172,6 +165,7 @@ public class InboxReader {
 			fetchorm.setUserid(account.getUserid());
 			fetchorm.setFetchStatus("Success");
 		}catch (Exception err){
+			err.printStackTrace();
 			fetchorm.setFetchErrorMessage("Error");
 		}
 		fetchhistorydao.insert(fetchorm);

@@ -12,8 +12,7 @@ import com.lumlate.midas.db.orm.RetailersORM;
 public class RetailersDAO {
 	private Vector<RetailersORM> retailers;
 	private Statement stmt;
-	// private String table="Retailers";
-	private String table = "companies";
+	private String table="Retailers";
 	private MySQLAccess access;
 
 	/***
@@ -36,10 +35,9 @@ public class RetailersDAO {
 	 * Exception{ for(CTR_Table ctr:ctr_table_rows){ Insert(ctr); } }
 	 ***/
 
-	public RetailersORM getRetailer(String domain) {
+	public RetailersORM getRetailer(String domain, RetailersORM retailer) {
 		String str = "Select id,name from " + table + " where domain=\""
 				+ domain + "\"";
-		RetailersORM retailer = new RetailersORM();
 		try {
 			ResultSet s = this.access.getConn().createStatement().executeQuery(str);
 			while (s.next()) {

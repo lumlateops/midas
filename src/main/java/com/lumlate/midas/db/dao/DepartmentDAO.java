@@ -15,9 +15,10 @@ public class DepartmentDAO {
 	private String table = "Department";
 	private PreparedStatement stmt;
 	private ResultSet generatedKeys = null;
-
+	private Gson g;
 	public void setAccess(MySQLAccess myaccess) {
 		this.access = myaccess;
+		g = new Gson();
 	}
 
 	public DepartmentORM insertGetId(DepartmentORM department) throws Exception {
@@ -34,14 +35,17 @@ public class DepartmentDAO {
 		stmt.setString(4, department.getName());
 		stmt.setString(5, department.getUpdatedAt());
 		stmt.setLong(6, department.getRetailerId());
-
-		this.stmt.executeUpdate();
+		try{
+			this.stmt.executeUpdate();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 		this.generatedKeys = stmt.getGeneratedKeys();
 		if (generatedKeys.next()) {
 			department.setId(generatedKeys.getLong(1));
 		} else {
 			throw new SQLException(
-					"Creating user failed, no generated key obtained.");
+					"Creating Department failed, no generated key obtained.");
 		}
 		// executeUpdate(query, Statement.RETURN_GENERATED_KEYS));
 		return department;

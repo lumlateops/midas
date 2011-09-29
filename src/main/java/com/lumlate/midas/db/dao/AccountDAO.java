@@ -22,7 +22,7 @@ public class AccountDAO {
 	public AccountORM getIDfromEmail(AccountORM account) throws Exception {
 		stmt = this.access.getConn()
 				.prepareStatement(
-						"select id,active,userId from " + this.table
+						"select id,active,userInfo_id from " + this.table
 								+ " where email=?");
 		stmt.setString(1, account.getEmail());
 
