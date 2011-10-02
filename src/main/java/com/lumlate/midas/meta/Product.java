@@ -3,23 +3,19 @@ package com.lumlate.midas.meta;
 import java.util.Set;
 
 public class Product {
-	private Vertical vertical;   //electronics
-	private Set<String> wordcloud;
+	private String category; 
+	private String item;
 	
-	public Vertical getVertical() {
-		return vertical;
+	public String getCategory() {
+		return category;
 	}
-	public void setVertical(Vertical vertical) {
-		this.vertical = vertical;
+	public void setCategory(String category) {
+		this.category = category;
 	}
-	public Set<String> getWordcloud() {
-		return wordcloud;
+	public String getItem() {
+		return item;
 	}
-	public void setWordcloud(Set<String> wordcloud) {
-		this.wordcloud = wordcloud;
-	}
-	
-	public void addWordinCloud(String word){
-		this.wordcloud.add(word);
+	public void setItem(String item) {
+		this.item = item;
 	}
 }

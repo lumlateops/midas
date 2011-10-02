@@ -20,26 +20,8 @@ public class DealORM {
 	private long dealEmailId;
 	private boolean freeShipping;
 	private long locationId;
+	private String tags;
 	
-	public DealORM() {
-		super();
-		this.id = id;
-		this.createdAt = createdAt;
-		this.dealValue = dealValue;
-		this.discountPercentage = discountPercentage;
-		this.originalValue = originalValue;
-		this.postDate = postDate;
-		this.title = title;
-		this.updatedAt = updatedAt;
-		this.expiryDate = expiryDate;
-		this.url = url;
-		this.validTo = validTo;
-		this.subscription_id = subscription_id;
-		this.userInfoid = userInfoid;
-		this.dealEmailId = dealEmailId;
-		this.freeShipping = freeShipping;
-		this.locationId = locationId;
-	}
 	public long getId() {
 		return id;
 	}
@@ -136,6 +118,12 @@ public class DealORM {
 	public void setLocationId(long locationId) {
 		this.locationId = locationId;
 	}
+	public String getTags() {
+		return tags;
+	}
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
 	public void clear() {
 		id=0;
 		createdAt=null;
@@ -153,6 +141,7 @@ public class DealORM {
 		dealEmailId=0;
 		freeShipping=false;
 		locationId=0;
+		tags=null;
 		
 	}
 

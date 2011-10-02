@@ -35,6 +35,7 @@ public class EmailProcessor {
 	private PersistData persistdata;
 	private String dealregexfile;
 	private String dateregexfile;
+	private String productfile;
 	private String rmqserver;
 	private String TASK_QUEUE_NAME;
 	private ConnectionFactory factory;
@@ -56,7 +57,7 @@ public class EmailProcessor {
 	}
 
 	public void readImapInbox(Session session) throws Exception {
-		CouponBuilder cb = new CouponBuilder(dealregexfile, dateregexfile);
+		CouponBuilder cb = new CouponBuilder(dealregexfile, dateregexfile, productfile);
 
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
@@ -123,6 +124,14 @@ public class EmailProcessor {
 
 	}
 
+	public String getProductfile() {
+		return productfile;
+	}
+
+	public void setProductfile(String productfile) {
+		this.productfile = productfile;
+	}
+
 	public String getReceivingHost() {
 		return receivingHost;
 	}
@@ -150,7 +159,7 @@ public class EmailProcessor {
 	public static void main(String[] args) {
 		Properties props = new Properties();
 		try {
-			props.load(new FileInputStream(args[2]));
+			props.load(new FileInputStream(args[3]));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -169,6 +178,7 @@ public class EmailProcessor {
 		session.setDebug(true);
 		newGmailClient.setDealregexfile(args[0]);
 		newGmailClient.setDateregexfile(args[1]);
+		newGmailClient.setProductfile(args[2]);
 		try {
 			newGmailClient.readImapInbox(session);
 		} catch (Exception e) {

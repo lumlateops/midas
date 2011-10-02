@@ -6,8 +6,6 @@ import java.util.HashSet;
 
 import javax.mail.internet.InternetAddress;
 
-import com.lumlate.midas.meta.Vertical;
-
 public class RetailersORM {
 
 	private long id;

@@ -27,8 +27,8 @@ public class DealDAO {
 				.prepareStatement(
 						"Insert into "
 								+ this.table
-								+ " (createdAt,dealEmail_id,dealRead,dealValue,discountPercentage,expiryDate,freeShipping,locationId,originalValue,postDate,title,updatedAt,url,userinfo_id,validTo,subscription_id) " +
-										"values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+								+ " (createdAt,dealEmail_id,dealRead,dealValue,discountPercentage,expiryDate,freeShipping,locationId,originalValue,postDate,title,updatedAt,url,userinfo_id,validTo,subscription_id,tags) " +
+										"values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 		stmt.setString(1, deal.getCreatedAt());
 		stmt.setLong(2, deal.getDealEmailId());
 		stmt.setBoolean(3, false);
@@ -45,6 +45,7 @@ public class DealDAO {
 		stmt.setLong(14, deal.getUserInfoid());
 		stmt.setString(15, deal.getValidTo());
 		stmt.setLong(16, deal.getSubscription_id());
+		stmt.setString(17, deal.getTags());
 
 		this.stmt.executeUpdate();
 		this.generatedKeys = stmt.getGeneratedKeys();

@@ -1,11 +1,5 @@
 package com.lumlate.midas.user;
 
-import java.util.HashSet;
-
-import com.lumlate.midas.location.Location;
-import com.lumlate.midas.meta.Subscription;
-import com.lumlate.midas.meta.Vertical;
-
 public class Consumer {
 	
 	private String firstname;

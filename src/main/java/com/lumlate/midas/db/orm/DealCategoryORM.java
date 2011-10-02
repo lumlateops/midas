@@ -13,6 +13,10 @@ public class DealCategoryORM {
 		this.description = description;
 	}
 	
+	public DealCategoryORM() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -30,6 +34,12 @@ public class DealCategoryORM {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public void clear() {
+		id=0;
+		category=null;
+		description=null;		
 	}
 	
 	
