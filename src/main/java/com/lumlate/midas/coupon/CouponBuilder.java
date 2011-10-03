@@ -6,26 +6,19 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.mail.internet.InternetAddress;
 
 import com.lumlate.midas.coupon.Coupon;
 import com.lumlate.midas.coupon.DateRegex;
 import com.lumlate.midas.coupon.DealRegex;
+import com.lumlate.midas.db.orm.ProductORM;
 import com.lumlate.midas.db.orm.RetailersORM;
 import com.lumlate.midas.email.Email;
-import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
 import com.google.gson.*;
 
@@ -33,7 +26,7 @@ public class CouponBuilder {
 	private Gson gson = new Gson();
 	HashMap<Pattern, DealRegex> dealpatternhash = new HashMap<Pattern, DealRegex>();
 	HashMap<Pattern, DateRegex> datepatternhash = new HashMap<Pattern, DateRegex>();
-	HashMap<String, String> products = new HashMap<String, String>();
+	HashMap<String, ProductORM> products = new HashMap<String, ProductORM>();
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	File dealregexfile;
 	File validregexfile;
@@ -63,9 +56,9 @@ public class CouponBuilder {
 		try {
 			while ((line = this.productreader.readLine()) != null) {
 				try{
-					Product product = this.gson.fromJson(line, Product.class);
+					ProductORM product = this.gson.fromJson(line, ProductORM.class);
 					if (!products.containsKey(product.getItem())) {
-						this.products.put(product.getItem(), product.getCategory());
+						this.products.put(product.getItem(), product);
 					}
 				}catch (Exception err){
 					System.out.println(line);
@@ -239,33 +232,16 @@ public class CouponBuilder {
 	}
 
 	private Coupon ExtractProduct(String text, Coupon coupon) {
-		HashMap<String, Set<String>> categoryhash = new HashMap<String, Set<String>>();
 		String[] textarr = text.split(" ");
-		String maxcategory="";
-		int maxcount=0;
+		LinkedList<ProductORM> p = new LinkedList<ProductORM>();
 		for (String word : textarr) {
 			word=word.replaceAll("\\s+", "");
 			word=word.replaceAll("\\W+", "");
 			if (products.containsKey(word)) {
-				if (categoryhash.containsKey(products.get(word))) {
-					categoryhash.get(products.get(word)).add(word);
-				} else {
-					categoryhash.put(products.get(word),
-							new HashSet<String>());
-					categoryhash.get(products.get(word)).add(word);
-				}
-				if(categoryhash.get(products.get(word)).size()>maxcount){
-					maxcount=categoryhash.get(products.get(word)).size();
-					maxcategory=products.get(word);
-				}
+				p.add(products.get(word));
 			}
 		}
-		if(categoryhash.containsKey(maxcategory)){
-			if(categoryhash.get(maxcategory).size()>0){
-				coupon.setCategory(maxcategory);
-				coupon.setItems(categoryhash.get(maxcategory));
-			}
-		}
+		coupon.setProducts(p);
 		return coupon;
 	}
 

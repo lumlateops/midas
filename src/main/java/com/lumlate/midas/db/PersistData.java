@@ -1,7 +1,9 @@
 package com.lumlate.midas.db;
 
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -9,17 +11,21 @@ import com.lumlate.midas.coupon.Coupon;
 import com.lumlate.midas.db.dao.AccountDAO;
 import com.lumlate.midas.db.dao.DealCategoryDAO;
 import com.lumlate.midas.db.dao.DealDAO;
+import com.lumlate.midas.db.dao.DealDealCategoryDAO;
 import com.lumlate.midas.db.dao.DealEmailDAO;
 import com.lumlate.midas.db.dao.DealProductDAO;
 import com.lumlate.midas.db.dao.DepartmentDAO;
+import com.lumlate.midas.db.dao.ProductDAO;
 import com.lumlate.midas.db.dao.RetailersDAO;
 import com.lumlate.midas.db.dao.SubscriptionDAO;
 import com.lumlate.midas.db.orm.AccountORM;
 import com.lumlate.midas.db.orm.DealCategoryORM;
+import com.lumlate.midas.db.orm.DealDealCategoryORM;
 import com.lumlate.midas.db.orm.DealEmailORM;
 import com.lumlate.midas.db.orm.DealORM;
 import com.lumlate.midas.db.orm.DealProductORM;
 import com.lumlate.midas.db.orm.DepartmentORM;
+import com.lumlate.midas.db.orm.ProductORM;
 import com.lumlate.midas.db.orm.RetailersORM;
 import com.lumlate.midas.db.orm.SubscriptionORM;
 import com.lumlate.midas.email.Email;
@@ -45,19 +51,18 @@ public class PersistData {
 	private DealDAO dealdao;
 	private AccountORM accountorm;
 	private AccountDAO accountdao;
-	private DealProductORM dealproductorm;
 	private DealProductDAO dealproductdao;
-	private DealCategoryORM dealcategoryorm;
-	private DealCategoryDAO dealcategorydao;
+	private ProductDAO productdao;
+	private DealDealCategoryDAO dealdealcategorydao;
 	private Gson gson;
 	
 	public PersistData(String mysqlhost, String mysqlport, String mysqluser,
 			String password, String database) {
-		mysqlhost = mysqlhost;
-		mysqlport = mysqlport;
-		mysqluser = mysqluser;
+		this.mysqlhost = mysqlhost;
+		this.mysqlport = mysqlport;
+		this.mysqluser = mysqluser;
 		mysqlpassword = password;
-		database = database;
+		this.database = database;
 		gson = new Gson();
 		myaccess = new MySQLAccess(mysqlhost, mysqlport, mysqluser,
 				mysqlpassword, database);
@@ -85,14 +90,13 @@ public class PersistData {
 		dealdao = new DealDAO();
 		dealdao.setAccess(myaccess);
 		
-		dealproductorm=new DealProductORM();
 		dealproductdao=new DealProductDAO();
 		dealproductdao.setAccess(myaccess);
 		
-		dealcategorydao = new DealCategoryDAO();
-		dealcategoryorm = new DealCategoryORM();
-		dealcategorydao.setAccess(myaccess);
-		
+		dealdealcategorydao = new DealDealCategoryDAO();
+		dealdealcategorydao.setAccess(myaccess);
+		productdao = new ProductDAO();
+		productdao.setAccess(myaccess);
 		emailcategories = new HashMap<String, Integer>() {
 			{
 				put("deal", 1);
@@ -158,31 +162,39 @@ public class PersistData {
 		// deal.setOriginalValue(this.coupon.get);
 		deal.setPostDate(email.getRecieveddate());
 		deal.setSubscription_id(subscription.getId());
-		deal.setTitle(email.getHtml().getTitle());
+		deal.setTitle(email.getSubject());
 		deal.setUpdatedAt(email.getRecieveddate());
 		deal.setUserInfoid(accountorm.getUserid());
 		deal.setExpiryDate(coupon.getExpiration());
 		deal.setFreeShipping(coupon.isIs_free_shipping());
 		deal.setValidTo(coupon.getValidupto());
 		deal.setDealEmailId(emailorm.getId());
-		deal.setTags(coupon.getItems().toString());
-		deal = dealdao.insertGetId(deal);
-		
-		if(coupon.getProduct()!=null && coupon.getProduct().getCategory()!=null){
-			dealcategoryorm.setCategory(coupon.getProduct().getCategory());
-			dealcategoryorm=dealcategorydao.getDealCategory(dealcategoryorm);
-			dealproductorm.setDealCategoryId(dealcategoryorm.getId());
-			dealproductorm.setDealId(deal.getId());
-			if(coupon.getProduct().getWordcloud()!=null){
-				dealproductorm.setTags(coupon.getProduct().getWordcloud().toString());
+		if(coupon.getProducts()!=null && coupon.getProducts().size()>0){
+			String tags="";
+			for(ProductORM p:coupon.getProducts()){
+				tags+=p.getItem()+",";
 			}
-			try{
-				dealproductdao.insertGetId(dealproductorm);
-			}catch (Exception err){
-				System.out.println(gson.toJson(dealproductorm));
-				err.printStackTrace();
-			}
+			deal.setTags(tags.substring(0, tags.length()-2));
 		}
+		deal = dealdao.insertGetId(deal);
+		List<DealDealCategoryORM> dealdealcategorylist = new ArrayList<DealDealCategoryORM>();
+		List<DealProductORM> dealproductlist = new ArrayList<DealProductORM>();
+		if(coupon.getProducts()!=null && coupon.getProducts().size()>0){
+			for(ProductORM p:coupon.getProducts()){
+				DealDealCategoryORM d=new DealDealCategoryORM();
+				DealProductORM dp=new DealProductORM();
+				p=productdao.getIDbyItem(p);
+				d.setDealId(deal.getId());
+				d.setCategoryId(p.getCategory_id());
+				dealdealcategorylist.add(d);
+				dp.setDealId(deal.getId());
+				dp.setProductId(p.getId());
+				dealproductlist.add(dp);
+			}
+			dealdealcategorydao.multiInsertGetIds(dealdealcategorylist);
+			dealproductdao.multiInsertGetIds(dealproductlist);
+		}
+		
 		clear();
 	}
 
@@ -192,8 +204,6 @@ public class PersistData {
 		department.clear();
 		subscription.clear();
 		deal.clear();
-		dealcategoryorm.clear();
-		dealproductorm.clear();
 	}
 
 }

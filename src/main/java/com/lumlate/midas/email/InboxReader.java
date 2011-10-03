@@ -48,19 +48,25 @@ import javax.mail.search.SearchTerm;
 
 public class InboxReader {
 	private LinkedList<SearchTerm> searchterms;
+
 	public LinkedList<SearchTerm> getSearchterms() {
 		return searchterms;
 	}
+
 	public void setSearchterms(LinkedList<SearchTerm> searchterms) {
 		this.searchterms = searchterms;
 	}
-	
-	public void readInbox(Properties props,String protocol, String hostname, String username, String password, Date lastfetch) throws Exception{
-		String TASK_QUEUE_NAME = props.getProperty("com.lumlate.midas.rmq.scheduler.queue");
+
+	public void readInbox(Properties props, String protocol, String hostname,
+			String username, String password, Date lastfetch) throws Exception {
+		String TASK_QUEUE_NAME = props
+				.getProperty("com.lumlate.midas.rmq.scheduler.queue");
 		String rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
-		String rmqusername=props.getProperty("com.lumlate.midas.rmq.username");
-		String rmqpassword=props.getProperty("com.lumlate.midas.rmq.password");
-		
+		String rmqusername = props
+				.getProperty("com.lumlate.midas.rmq.username");
+		String rmqpassword = props
+				.getProperty("com.lumlate.midas.rmq.password");
+
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setUsername(rmqusername);
 		factory.setPassword(rmqpassword);
@@ -75,17 +81,20 @@ public class InboxReader {
 			store.connect(props.getProperty(hostname), username, password);
 			Folder folder = store.getFolder("INBOX");// get inbox
 			folder.open(Folder.READ_ONLY);// open folder only to read
-			SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
-			
+			SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN),
+					false);
+
 			SearchTerm[] starray = new SearchTerm[searchterms.size()];
 			searchterms.toArray(starray);
-			SearchTerm st = new OrTerm(starray); // TODO add date to this as well so
+			SearchTerm st = new OrTerm(starray); // TODO add date to this as
+													// well so
 			// that fetch is since last time
-			if(lastfetch!=null){
-				
-				SearchTerm newerThen = new ReceivedDateTerm(ComparisonTerm.GT, lastfetch);
+			if (lastfetch != null) {
+
+				SearchTerm newerThen = new ReceivedDateTerm(ComparisonTerm.GT,
+						lastfetch);
 				st = new AndTerm(st, flagterm);
-				st=new AndTerm(st,newerThen);
+				st = new AndTerm(st, newerThen);
 			}
 			Message message[] = folder.search(st);
 			for (int i = 0; i < message.length; i++) {
@@ -98,28 +107,32 @@ public class InboxReader {
 			}
 			channel.close();
 			connection.close();
-		}catch(Exception err){
+		} catch (Exception err) {
 			err.printStackTrace();
 		}
 	}
+
 	public static void main(String[] args) throws Exception {
 
-		if(args.length<1){
+		if (args.length < 1) {
 			System.out.println(String.format("Usage: <properties>"));
 		}
-		SimpleDateFormat formatter=  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 		Properties props = new Properties();
 		props.load(new FileInputStream(args[0]));
-		
-		String mysqlhost=props.getProperty("com.lumlate.midas.mysql.host");
-		String dbport=props.getProperty("com.lumlate.midas.mysql.port");
-		String dbuser=props.getProperty("com.lumlate.midas.mysql.user");
-		String dbpassword=props.getProperty("com.lumlate.midas.mysql.password");
-		String db=props.getProperty("com.lumlate.midas.mysql.database");
-		System.out.println(mysqlhost+" "+dbport+" "+dbuser+" "+dbpassword+" "+db);
-		MySQLAccess myaccess = new MySQLAccess(mysqlhost, dbport, dbuser,dbpassword, db);
-		
+
+		String mysqlhost = props.getProperty("com.lumlate.midas.mysql.host");
+		String dbport = props.getProperty("com.lumlate.midas.mysql.port");
+		String dbuser = props.getProperty("com.lumlate.midas.mysql.user");
+		String dbpassword = props
+				.getProperty("com.lumlate.midas.mysql.password");
+		String db = props.getProperty("com.lumlate.midas.mysql.database");
+		System.out.println(mysqlhost + " " + dbport + " " + dbuser + " "
+				+ dbpassword + " " + db);
+		MySQLAccess myaccess = new MySQLAccess(mysqlhost, dbport, dbuser,
+				dbpassword, db);
+
 		RetailersDAO retaildao = new RetailersDAO();
 		retaildao.setStmt(myaccess.getConn().createStatement());
 		LinkedList<String> retaildomains = retaildao.getallRetailerDomains();
@@ -128,47 +141,57 @@ public class InboxReader {
 			SearchTerm retailsearchterm = new FromStringTerm(retaildomain);
 			searchterms.add(retailsearchterm);
 		}
-		
-		FetchHistoryDAO fetchhistorydao=new FetchHistoryDAO();
-		FetchHistoryORM fetchorm=new FetchHistoryORM();
+
+		FetchHistoryDAO fetchhistorydao = new FetchHistoryDAO();
+		FetchHistoryORM fetchorm = new FetchHistoryORM();
 		fetchhistorydao.setAccess(myaccess);
-		
+
 		props.setProperty("mail.imap.connectiontimeout", "5000");
 		props.setProperty("mail.imap.timeout", "5000");
 		props.setProperty("mail.store.protocol", "imaps");
 		props.setProperty("mail.imap.host", "imap.gmail.com");
 		props.setProperty("mail.imap.port", "993");
-		props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.imap.socketFactory.class",
+				"javax.net.ssl.SSLSocketFactory");
 		props.setProperty("mail.imap.socketFactory.fallback", "false");
-		InboxReader inboxreader=new InboxReader();
+		InboxReader inboxreader = new InboxReader();
 		inboxreader.setSearchterms(searchterms);
-		
-		String user="lumlatedeals@gmail.com";
-		String pass="latelumdeals";
-		
-		AccountDAO accountdao=new AccountDAO();
+
+		String user = "lumlatedeals@gmail.com";
+		String pass = "latelumdeals";
+
+		AccountDAO accountdao = new AccountDAO();
 		AccountORM account = new AccountORM();
 		accountdao.setAccess(myaccess);
 		account.setEmail(user);
-		account=accountdao.getIDfromEmail(account);
+		account = accountdao.getIDfromEmail(account);
 		Date lastfetchdate = null;
-		try{
-			Date date = new Date();
-			fetchorm.setFetchStartTime(formatter.format(date));
-			String lastfetch=fetchhistorydao.getLastFetchTime(account.getUserid());
-			if(lastfetch!=null){
-				lastfetchdate = formatter.parse(lastfetch);
-			}
-			inboxreader.readInbox(props, "imaps", "mail.imap.host", user,pass, lastfetchdate);
-			date=new Date();
-			fetchorm.setFetchEndTime(formatter.format(date));
-			fetchorm.setUserid(account.getUserid());
-			fetchorm.setFetchStatus("Success");
-		}catch (Exception err){
-			err.printStackTrace();
-			fetchorm.setFetchErrorMessage("Error");
+		Date date = new Date();
+		fetchorm.setFetchStartTime(formatter.format(date));
+		String lastfetch = fetchhistorydao
+				.getLastFetchTime(account.getUserid());
+		if (lastfetch != null) {
+			lastfetchdate = formatter.parse(lastfetch);
 		}
-		fetchhistorydao.insert(fetchorm);
+		fetchorm.setFetchEndTime(formatter.format(date));
+		fetchorm.setUserid(account.getUserid());
+		fetchorm.setFetchStatus("In Progress");
+		fetchorm = fetchhistorydao.insert(fetchorm);
+		try {
+			inboxreader.readInbox(props, "imaps", "mail.imap.host", user, pass,
+					lastfetchdate);
+			date = new Date();
+			fetchorm.setFetchEndTime(formatter.format(date));
+			fetchorm.setFetchStatus("Success");
+			fetchhistorydao.update(fetchorm);
+		} catch (Exception e) {
+			e.printStackTrace();
+			date = new Date();
+			fetchorm.setFetchEndTime(formatter.format(date));
+			fetchorm.setFetchStatus("Error");
+			fetchorm.setFetchErrorMessage(e.getMessage());
+			fetchhistorydao.update(fetchorm);
+		}
 		myaccess.Dissconnect();
 	}
 }

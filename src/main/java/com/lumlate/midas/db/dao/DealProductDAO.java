@@ -5,9 +5,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.lumlate.midas.db.MySQLAccess;
 import com.lumlate.midas.db.orm.DealProductORM;
+import com.lumlate.midas.db.orm.ProductORM;
 
 public class DealProductDAO {
 	private MySQLAccess access;
@@ -43,7 +45,7 @@ public class DealProductDAO {
 		return dealproductrow;
 	}
 	
-	public DealProductORM[] multiInsertGetIds(DealProductORM[] dealorms) throws Exception {
+	public List<DealProductORM> multiInsertGetIds(List<DealProductORM> dealorms) throws Exception {
 		stmt= this.access.getConn().prepareStatement("Insert into " +this.table + " (Deal_id,products_id) values (?,?)",
 				Statement.RETURN_GENERATED_KEYS);
 		for(DealProductORM dealorm:dealorms){
@@ -56,7 +58,7 @@ public class DealProductDAO {
 		try{
 			int flag=0;
 			while (generatedKeys.next()) {
-				dealorms[flag].setId(generatedKeys.getLong(1));
+				dealorms.get(flag).setId(generatedKeys.getLong(1));
 				flag+=1;
 			}	
 		}catch (Exception e){
@@ -64,5 +66,4 @@ public class DealProductDAO {
 		}
 		return dealorms;
 	}
-	
 }

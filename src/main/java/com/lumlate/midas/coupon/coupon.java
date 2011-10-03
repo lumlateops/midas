@@ -1,11 +1,12 @@
 package com.lumlate.midas.coupon;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Set;
 
+import com.lumlate.midas.db.orm.ProductORM;
 import com.lumlate.midas.db.orm.RetailersORM;
 import com.lumlate.midas.location.Location;
-import com.lumlate.midas.meta.Product;
 import com.lumlate.midas.user.Consumer;
 
 public class Coupon {
@@ -16,8 +17,7 @@ public class Coupon {
 	private int dealvalue;
 	private int salepercentage;
 	
-	private String category;
-	private Set<String> items;
+	private LinkedList<ProductORM> products;
 	
 	private String expiration; //when there is a specifc date
 	private String validupto; //time left in millisec
@@ -75,16 +75,10 @@ public class Coupon {
 	public void setConsumer(Consumer consumer) {
 		this.consumer = consumer;
 	}
-	public String getCategory() {
-		return category;
+	public LinkedList<ProductORM> getProducts() {
+		return products;
 	}
-	public void setCategory(String category) {
-		this.category = category;
-	}
-	public Set<String> getItems() {
-		return items;
-	}
-	public void setItems(Set<String> items) {
-		this.items = items;
+	public void setProducts(LinkedList<ProductORM> products) {
+		this.products = products;
 	}
 }

@@ -23,10 +23,7 @@ public class DealEmailDAO {
 	}
 
 	public DealEmailORM insertGetId(DealEmailORM dealemailrow) throws Exception {
-		System.out.println("======================================================================================================");
 		System.out.println(dealemailrow.getContent());
-		System.out.println(dealemailrow.getParsedContent());
-		System.out.println("======================================================================================================");
 		stmt = this.access
 				.getConn()
 				.prepareStatement(
@@ -40,7 +37,7 @@ public class DealEmailDAO {
 		stmt.setString(4, dealemailrow.getDomainKey());
 		stmt.setString(5, dealemailrow.getFromEmail());
 		stmt.setString(6, dealemailrow.getFromName());
-		stmt.setString(7, dealemailrow.getParsedContent().substring(0, 254));
+		stmt.setString(7, dealemailrow.getParsedContent());
 		stmt.setString(8, dealemailrow.getSenderIP());
 		stmt.setString(9, dealemailrow.getSentDate());
 		stmt.setString(10, dealemailrow.getSpfResult());

@@ -27,4 +27,9 @@ public class DealDealCategoryORM {
 	public void setCategoryId(long categoryId) {
 		this.categoryId = categoryId;
 	}
+	public void clear() {
+		id=0;
+		dealId=0;
+		categoryId=0;		
+	}
 }

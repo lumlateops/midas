@@ -5,15 +5,6 @@ public class DealProductORM {
 	private long id;
 	private long DealId;
 	private long ProductId;
-	private String tags;
-
-	public DealProductORM(long id, long dealId, long productId, String tags) {
-		super();
-		this.id = id;
-		DealId = dealId;
-		ProductId = productId;
-		this.tags = tags;
-	}
 
 	public DealProductORM() {
 		super();
@@ -44,19 +35,9 @@ public class DealProductORM {
 		ProductId = productId;
 	}
 
-	public String getTags() {
-		return tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-
 	public void clear() {
 		id = 0;
 		DealId = 0;
 		ProductId = 0;
-		tags = null;
-
 	}
 }

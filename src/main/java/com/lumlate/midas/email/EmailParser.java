@@ -140,7 +140,6 @@ public class EmailParser {
 		
 		//body
 		try{
-			Object body = msg.getContent();
 			String email_content="";
 			email_content=this.getText(msg);
 			if(!(email_content==null)){

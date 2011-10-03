@@ -6,9 +6,10 @@ public class ProductORM {
 
 	private long id;
 	private Date createdAt;
-	private String name;
+	private String item;
 	private Date updatedAt;
-	private String dealcategory;
+	private String categoryName;
+	private long category_id;
 
 	public ProductORM() {
 		super();
@@ -31,12 +32,12 @@ public class ProductORM {
 		this.createdAt = createdAt;
 	}
 
-	public String getName() {
-		return name;
+	public String getItem() {
+		return item;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setItem(String item) {
+		this.item = item;
 	}
 
 	public Date getUpdatedAt() {
@@ -47,12 +48,20 @@ public class ProductORM {
 		this.updatedAt = updatedAt;
 	}
 
-	public String getDealcategory() {
-		return dealcategory;
+	public String getCategoryName() {
+		return categoryName;
 	}
 
-	public void setDealcategory(String dealcategory) {
-		this.dealcategory = dealcategory;
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public long getCategory_id() {
+		return category_id;
+	}
+
+	public void setCategory_id(long category_id) {
+		this.category_id = category_id;
 	}
 
 }

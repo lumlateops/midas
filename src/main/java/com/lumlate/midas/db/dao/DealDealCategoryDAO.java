@@ -3,6 +3,7 @@ package com.lumlate.midas.db.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
 import com.lumlate.midas.db.MySQLAccess;
 import com.lumlate.midas.db.orm.DealDealCategoryORM;
@@ -42,8 +43,8 @@ public class DealDealCategoryDAO {
 		return dealdealcategoryrow;
 	}
 	
-	public DealDealCategoryORM[] multiInsertGetIds(DealDealCategoryORM[] dealdealcategoryorms) throws Exception {
-		stmt= this.access.getConn().prepareStatement("Insert into " +this.table + " (Deal_id,DealCategoryId) values (?,?)",
+	public List<DealDealCategoryORM> multiInsertGetIds(List<DealDealCategoryORM> dealdealcategoryorms) throws Exception {
+		stmt= this.access.getConn().prepareStatement("Insert into " +this.table + " (Deal_id,category_id) values (?,?)",
 				Statement.RETURN_GENERATED_KEYS);
 		for(DealDealCategoryORM dealdealcategoryorm:dealdealcategoryorms){
 			stmt.setLong(1, dealdealcategoryorm.getDealId());
@@ -55,7 +56,7 @@ public class DealDealCategoryDAO {
 		try{
 			int flag=0;
 			while (generatedKeys.next()) {
-				dealdealcategoryorms[flag].setId(generatedKeys.getLong(1));
+				dealdealcategoryorms.get(flag).setId(generatedKeys.getLong(1));
 				flag+=1;
 			}	
 		}catch (Exception e){
