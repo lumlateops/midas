@@ -1,5 +1,6 @@
 package com.lumlate.midas.db.orm;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Date;
 
 public class DealEmailORM {
@@ -47,12 +48,14 @@ public class DealEmailORM {
 	public void setCategory(long category) {
 		this.category = category;
 	}
+	
 	public String getContent() {
 		return content;
 	}
 	public void setContent(String content) {
-		this.content = content;
+		this.content = content.replaceFirst("^\\s+", "");
 	}
+
 	public String getDateReceived() {
 		return dateReceived;
 	}
@@ -113,7 +116,6 @@ public class DealEmailORM {
 	public void setToName(String toName) {
 		this.toName = toName;
 	}
-
 	public void clear() {
 		id=0;
 		category=0;

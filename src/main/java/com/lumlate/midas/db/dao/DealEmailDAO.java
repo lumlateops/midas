@@ -23,7 +23,6 @@ public class DealEmailDAO {
 	}
 
 	public DealEmailORM insertGetId(DealEmailORM dealemailrow) throws Exception {
-		System.out.println(dealemailrow.getContent());
 		stmt = this.access
 				.getConn()
 				.prepareStatement(

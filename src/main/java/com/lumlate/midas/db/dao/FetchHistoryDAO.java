@@ -76,7 +76,7 @@ public class FetchHistoryDAO {
 				.prepareStatement(
 						"Update "
 								+ this.table
-								+ " set (fetchEndTime,fetchErrorMessage,fetchStartTime,fetchStatus,sessionid,userInfo_id) values (?,?,?,?,?,?) where id=?",
+								+ " set fetchEndTime=?,fetchErrorMessage=?,fetchStartTime=?,fetchStatus=?,sessionid=?,userInfo_id=? where id=?",
 						Statement.RETURN_GENERATED_KEYS);
 		stmt.setString(1, fetchorm.getFetchEndTime());
 		stmt.setString(2, fetchorm.getFetchErrorMessage());
