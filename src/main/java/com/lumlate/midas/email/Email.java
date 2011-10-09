@@ -76,7 +76,7 @@ public class Email {
 		return content;
 	}
 	public void setContent(String content) {
-		this.content = content.toLowerCase();
+		this.content = content;
 	}
 	public boolean isIs_plaintext() {
 		return is_plaintext;

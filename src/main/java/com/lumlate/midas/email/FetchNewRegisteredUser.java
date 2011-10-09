@@ -20,6 +20,7 @@ import com.lumlate.midas.db.dao.FetchHistoryDAO;
 import com.lumlate.midas.db.dao.RetailersDAO;
 import com.lumlate.midas.db.orm.AccountORM;
 import com.lumlate.midas.db.orm.FetchHistoryORM;
+import com.lumlate.midas.email.InboxReader;
 import com.lumlate.midas.utils.Utility;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;

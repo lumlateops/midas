@@ -87,7 +87,7 @@ public class EmailProcessor {
 				} else if (email.isIs_plaintext()
 						&& !email.getContent().isEmpty()) {
 					parseflag = true;
-					htmlparser.setRawtext(email.getContent());
+					htmlparser.setRawtext(email.getContent().toLowerCase());
 				} else if (!email.getContent().isEmpty()) {
 					parseflag = true;
 					htmlparser.parsehtml(email.getContent());
