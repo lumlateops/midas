@@ -1,6 +1,7 @@
 package com.lumlate.midas.coupon;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -16,8 +17,9 @@ public class Coupon {
 	
 	private int dealvalue;
 	private int salepercentage;
+	private int originalvalue;
 	
-	private LinkedList<ProductORM> products;
+	private HashSet<ProductORM> products;
 	
 	private String expiration; //when there is a specifc date
 	private String validupto; //time left in millisec
@@ -75,10 +77,16 @@ public class Coupon {
 	public void setConsumer(Consumer consumer) {
 		this.consumer = consumer;
 	}
-	public LinkedList<ProductORM> getProducts() {
+	public HashSet<ProductORM> getProducts() {
 		return products;
 	}
-	public void setProducts(LinkedList<ProductORM> products) {
+	public void setProducts(HashSet<ProductORM> products) {
 		this.products = products;
+	}
+	public int getOriginalvalue() {
+		return originalvalue;
+	}
+	public void setOriginalvalue(int originalvalue) {
+		this.originalvalue = originalvalue;
 	}
 }

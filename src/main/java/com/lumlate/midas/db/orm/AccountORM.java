@@ -17,6 +17,8 @@ public class AccountORM {
 	private Date updatedAt;
 	private long userid;
 	private long provider_id;
+	private boolean registeredEmail;
+	private String password;
 
 	public long getId() {
 		return id;
@@ -119,6 +121,22 @@ public class AccountORM {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public boolean isRegisteredEmail() {
+		return registeredEmail;
+	}
+
+	public void setRegisteredEmail(boolean registeredEmail) {
+		this.registeredEmail = registeredEmail;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	public void clear() {
 		id = 0;
@@ -133,6 +151,8 @@ public class AccountORM {
 		updatedAt = null;
 		userid = 0;
 		provider_id = 0;
+		registeredEmail=false;
+		password=null;
 	}
 
 }

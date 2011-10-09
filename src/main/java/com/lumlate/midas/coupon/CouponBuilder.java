@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,9 +82,18 @@ public class CouponBuilder {
 			coupon=ExtractRetailer(email, coupon);
 			coupon=ExtractConsumer(email, coupon);
 			coupon=this.ExtractProduct(email.getHtml().getRawtext(), coupon);
+			coupon=this.isFreeShipping(email,coupon);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
+		}
+		return coupon;
+	}
+
+	private Coupon isFreeShipping(Email email, Coupon coupon) {
+		// TODO Auto-generated method stub
+		if(email.getHtml().getRawtext().contains("free shipping")==true){
+			coupon.setIs_free_shipping(true);
 		}
 		return coupon;
 	}
@@ -176,8 +186,12 @@ public class CouponBuilder {
 										.getIndexes()[1])));
 						if (value1 > value2 && value2 > 0) {
 							coupon.setSalepercentage(value2 * 100 / value1);
+							coupon.setDealvalue(value2);
+							coupon.setOriginalvalue(value1);
 						} else if (value1 < value2 && value1 > 0) {
 							coupon.setSalepercentage(value1 * 100 / value2);
+							coupon.setDealvalue(value1);
+							coupon.setOriginalvalue(value2);
 						}
 					} else if (this.dealpatternhash.get(key).getIndexes().length == 1) {
 						coupon.setDealvalue(Integer.parseInt(matcher
@@ -233,10 +247,10 @@ public class CouponBuilder {
 
 	private Coupon ExtractProduct(String text, Coupon coupon) {
 		String[] textarr = text.split(" ");
-		LinkedList<ProductORM> p = new LinkedList<ProductORM>();
+		HashSet<ProductORM> p = new HashSet<ProductORM>();
 		for (String word : textarr) {
 			word=word.replaceAll("\\s+", "");
-			word=word.replaceAll("\\W+", "");
+			//word=word.replaceAll("\\W+", "");
 			if (products.containsKey(word)) {
 				p.add(products.get(word));
 			}

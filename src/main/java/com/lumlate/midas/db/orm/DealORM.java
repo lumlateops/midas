@@ -21,6 +21,7 @@ public class DealORM {
 	private boolean freeShipping;
 	private long locationId;
 	private String tags;
+	private Boolean dealInWallet=false;
 	
 	public long getId() {
 		return id;
@@ -124,6 +125,12 @@ public class DealORM {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
+	public Boolean getDealInWallet() {
+		return dealInWallet;
+	}
+	public void setDealInWallet(Boolean dealInWallet) {
+		this.dealInWallet = dealInWallet;
+	}
 	public void clear() {
 		id=0;
 		createdAt=null;
@@ -142,6 +149,7 @@ public class DealORM {
 		freeShipping=false;
 		locationId=0;
 		tags=null;
+		dealInWallet=false;
 		
 	}
 

@@ -76,8 +76,7 @@ public class FetchHistoryDAO {
 				.prepareStatement(
 						"Update "
 								+ this.table
-								+ " set fetchEndTime=?,fetchErrorMessage=?,fetchStartTime=?,fetchStatus=?,sessionid=?,userInfo_id=? where id=?",
-						Statement.RETURN_GENERATED_KEYS);
+								+ " set fetchEndTime=?,fetchErrorMessage=?,fetchStartTime=?,fetchStatus=?,sessionid=?,userInfo_id=? where id=?");
 		stmt.setString(1, fetchorm.getFetchEndTime());
 		stmt.setString(2, fetchorm.getFetchErrorMessage());
 		stmt.setString(3, fetchorm.getFetchStartTime());
@@ -85,15 +84,11 @@ public class FetchHistoryDAO {
 		stmt.setString(5, fetchorm.getSessionid());
 		stmt.setLong(6, fetchorm.getUserid());
 		stmt.setLong(7, fetchorm.getId());
-		this.stmt.executeUpdate();
-		this.generatedKeys = stmt.getGeneratedKeys();
-		if (generatedKeys.next()) {
-			fetchorm.setId(generatedKeys.getLong(1));
-		} else {
-			throw new SQLException(
-					"updating fecthistory failed, no generated key obtained.");
+		try {
+			this.stmt.executeUpdate();
+		} catch (SQLException err) {
+			throw new SQLException("updating fecthistory failed, no generated key obtained.");
 		}
-		// executeUpdate(query, Statement.RETURN_GENERATED_KEYS));
 		return fetchorm;
 	}
 }
