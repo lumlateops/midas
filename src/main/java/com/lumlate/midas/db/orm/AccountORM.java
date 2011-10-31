@@ -18,7 +18,6 @@ public class AccountORM {
 	private long userid;
 	private long provider_id;
 	private boolean registeredEmail;
-	private String password;
 
 	public long getId() {
 		return id;
@@ -118,8 +117,6 @@ public class AccountORM {
 
 	public long getId(String email) {
 		return id;
-		// TODO Auto-generated method stub
-
 	}
 	
 	public boolean isRegisteredEmail() {
@@ -128,14 +125,6 @@ public class AccountORM {
 
 	public void setRegisteredEmail(boolean registeredEmail) {
 		this.registeredEmail = registeredEmail;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	public void clear() {
@@ -152,7 +141,6 @@ public class AccountORM {
 		userid = 0;
 		provider_id = 0;
 		registeredEmail=false;
-		password=null;
 	}
 
 }

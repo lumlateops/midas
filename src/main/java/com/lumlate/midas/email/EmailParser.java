@@ -35,7 +35,7 @@ public class EmailParser {
 		this.is_text=false;
 		this.is_attachment=false;
 		this.is_html=false;
-		this.frompattern=Pattern.compile("(.*)(<.*>)");
+		this.frompattern=Pattern.compile("(?:.*)(<.*>)", Pattern.MULTILINE);
 		this.receivedpattern=Pattern.compile("(.*\\[)(.*)(\\].*)");
 	}
 
@@ -88,16 +88,12 @@ public class EmailParser {
 
 
 	public Email parser(Message msg) throws Exception{
-		Address[] from=msg.getFrom();
-		Address[] to=msg.getAllRecipients();
 		Email email=new Email();
 		email.setSubject(MimeUtility.decodeText(msg.getSubject()));
-
 		//headers
 		Enumeration<Header> e= msg.getAllHeaders();
 		while(e.hasMoreElements()){
 			Header h = e.nextElement();
-			//System.out.println(h.getName()+"\t"+h.getValue());
 			if(h.getName().equalsIgnoreCase("Received")){
 				String value=MimeUtility.decodeText(h.getValue());
 				if(value.startsWith("From")){
@@ -107,12 +103,20 @@ public class EmailParser {
 					}
 				}
 			}
-			if(h.getName().equalsIgnoreCase("From")){
+			if(!msg.getFrom()[0].toString().isEmpty()){
+				String value = msg.getFrom()[0].toString();
+				Matcher rmatcher=this.frompattern.matcher(value);
+				if(rmatcher.matches()){
+					email.setFromname(rmatcher.group(0));
+					String fromemail = rmatcher.group(1).replace(">", "").replace("<", "");
+					email.setFromemail(fromemail);
+				}
+			}else if(h.getName().equalsIgnoreCase("From")){
 				String value=MimeUtility.decodeText(h.getValue());
 				Matcher rmatcher=this.frompattern.matcher(value);
 				if(rmatcher.matches()){
-					email.setFromname(rmatcher.group(1));
-					String fromemail = rmatcher.group(2).replace(">", "").replace("<", "");
+					email.setFromname(rmatcher.group(0));
+					String fromemail = rmatcher.group(1).replace(">", "").replace("<", "");
 					email.setFromemail(fromemail);
 				}
 			}

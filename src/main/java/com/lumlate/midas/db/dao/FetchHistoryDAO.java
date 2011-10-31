@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.google.gson.Gson;
 import com.lumlate.midas.db.MySQLAccess;
 import com.lumlate.midas.db.orm.FetchHistoryORM;
 
@@ -35,7 +36,6 @@ public class FetchHistoryDAO {
 		stmt.setString(4, fetchhistory.getFetchStatus());
 		stmt.setString(5, fetchhistory.getSessionid());
 		stmt.setLong(6, fetchhistory.getUserid());
-
 		this.stmt.executeUpdate();
 		this.generatedKeys = stmt.getGeneratedKeys();
 		if (generatedKeys.next()) {

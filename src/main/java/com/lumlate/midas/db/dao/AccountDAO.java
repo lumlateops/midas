@@ -22,7 +22,7 @@ public class AccountDAO {
 
 	public AccountORM getIDfromEmail(AccountORM account) throws Exception {
 		stmt = this.access.getConn().prepareStatement(
-				"select id,active,userInfo_id,email,provider_id,registeredEmail,password from "
+				"select id,active,userInfo_id,email,provider_id,registeredEmail,dllrAccessToken,dllrTokenSecret from "
 						+ this.table
 						+ " where email=? and active=? and registeredEmail=?");
 		stmt.setString(1, account.getEmail());
@@ -38,7 +38,8 @@ public class AccountDAO {
 				account.setEmail(generatedKeys.getString(4));
 				account.setProvider_id(generatedKeys.getLong(5));
 				account.setRegisteredEmail(generatedKeys.getBoolean(6));
-				account.setPassword(generatedKeys.getString(7));
+				account.setDllrAccessToken(generatedKeys.getString(7));
+				account.setDllrTokenSecret(generatedKeys.getString(8));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -49,7 +50,7 @@ public class AccountDAO {
 
 	public LinkedList<AccountORM> getAllAccounts() throws Exception {
 		stmt = this.access.getConn().prepareStatement(
-				"select id,active,userInfo_id,email,provider_id,registeredEmail,password from "
+				"select id,active,userInfo_id,email,provider_id,registeredEmail,dllrAccessToken,dllrTokenSecret from "
 						+ this.table
 						+ " where active=? and registeredEmail=?");
 		stmt.setBoolean(1, true);
@@ -65,7 +66,8 @@ public class AccountDAO {
 				account.setEmail(generatedKeys.getString(4));
 				account.setProvider_id(generatedKeys.getLong(5));
 				account.setRegisteredEmail(generatedKeys.getBoolean(6));
-				account.setPassword(generatedKeys.getString(7));
+				account.setDllrAccessToken(generatedKeys.getString(7));
+				account.setDllrTokenSecret(generatedKeys.getString(8));
 				accountlist.add(account);
 			}
 		} catch (Exception e) {
@@ -77,7 +79,7 @@ public class AccountDAO {
 	public LinkedList<AccountORM> getBatchAccounts(long minid, long maxid)
 			throws Exception {
 		stmt = this.access.getConn().prepareStatement(
-				"select id,active,userInfo_id,email,provider_id,registeredEmail,password from "
+				"select id,active,userInfo_id,email,provider_id,registeredEmail,dllrAccessToken,dllrTokenSecret from "
 						+ this.table + " where id>=? and id<=? and active=? and registeredEmail=?");
 		stmt.setLong(1, minid);
 		stmt.setLong(2, maxid);
@@ -95,7 +97,8 @@ public class AccountDAO {
 				account.setEmail(generatedKeys.getString(4));
 				account.setProvider_id(generatedKeys.getLong(5));
 				account.setRegisteredEmail(generatedKeys.getBoolean(6));
-				account.setPassword(generatedKeys.getString(7));
+				account.setDllrAccessToken(generatedKeys.getString(7));
+				account.setDllrTokenSecret(generatedKeys.getString(8));
 				accontlist.add(account);
 			}
 		} catch (Exception e) {

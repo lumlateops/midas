@@ -46,7 +46,6 @@ public class EmailProcessor {
 	public EmailProcessor(Properties props) throws Exception{
 		gson = new Gson();
 		rmqserver=props.getProperty("com.lumlate.midas.rmq.server");
-		TASK_QUEUE_NAME=props.getProperty("com.lumlate.midas.rmq.scheduler.queue");
 		factory = new ConnectionFactory();
 		factory.setHost(rmqserver);
 		factory.setUsername(props.getProperty("com.lumlate.midas.rmq.username"));
@@ -102,9 +101,8 @@ public class EmailProcessor {
 				if (!category.isEmpty()) {
 					email.setCategory(category);
 				}
-				// System.out.println(gson.toJson(email));
 				if (category.equalsIgnoreCase("deal")
-						|| category.equalsIgnoreCase("subscription") || category.equalsIgnoreCase("other")) { 
+						|| category.equalsIgnoreCase("subscription")) { 
 					try {
 						Coupon coupon = cb.BuildCoupon(email);
 						if (coupon != null) {
@@ -117,7 +115,7 @@ public class EmailProcessor {
 					System.out.println("NOT CATEGORIZED " + email.getSubject());
 				}
 			} catch (Exception e) {
-				System.out.println(e.toString());
+				e.printStackTrace();
 			}
 			channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 		}
@@ -155,11 +153,21 @@ public class EmailProcessor {
 	public void setDateregexfile(String dateregexfile) {
 		this.dateregexfile = dateregexfile;
 	}
+	public String getTASK_QUEUE_NAME() {
+		return TASK_QUEUE_NAME;
+	}
+
+	public void setTASK_QUEUE_NAME(String tASK_QUEUE_NAME) {
+		TASK_QUEUE_NAME = tASK_QUEUE_NAME;
+	}
 
 	public static void main(String[] args) {
+		if(args.length<4){
+			System.out.println("Usage: dealregex dateregex productfile fetchtype properties");
+		}
 		Properties props = new Properties();
 		try {
-			props.load(new FileInputStream(args[3]));
+			props.load(new FileInputStream(args[4]));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -179,6 +187,15 @@ public class EmailProcessor {
 		newGmailClient.setDealregexfile(args[0]);
 		newGmailClient.setDateregexfile(args[1]);
 		newGmailClient.setProductfile(args[2]);
+		if(args[3].equalsIgnoreCase("scheduler"))
+			newGmailClient.setTASK_QUEUE_NAME(props.getProperty("com.lumlate.midas.rmq.scheduler.queue"));
+		else if(args[3].equalsIgnoreCase("newuser"))
+			newGmailClient.setTASK_QUEUE_NAME(props.getProperty("com.lumlate.midas.rmq.register.publish.queue"));
+		else{
+			System.out.println("Dont understand the fetchtype. FetchType can only be scheduler or newuser");
+			System.exit(0);
+		}
+		
 		try {
 			newGmailClient.readImapInbox(session);
 		} catch (Exception e) {

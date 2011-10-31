@@ -1,0 +1,32 @@
+sweepstake
+coupon
+$\d+\.\d+ off
+good through
+coupon code
+save
+print this coupon
+redeem
+bargain
+expiration date
+valid for
+offer
+promo
+code
+exclusive
+discount
+offer expires
+expires
+not valid
+deal
+promotion
+final hour
+save \d+%
+\$\d+ for \$\d+
+pass
+free shipping
+rewards
+half off
+sale
+special
+giving away
+last chance

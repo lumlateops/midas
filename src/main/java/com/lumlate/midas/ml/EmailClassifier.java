@@ -85,6 +85,8 @@ public class EmailClassifier {
 		this.dealhash.put("exclusive", true);
 		this.dealhash.put("discount", true);
 		this.dealhash.put("deal", true);
+		this.dealhash.put("deals", true);
+		this.dealhash.put("shop", true);
 		this.dealhash.put("promotion", true);
 		this.dealhash.put("final", true);
 		this.dealhash.put("hour", true);
@@ -101,7 +103,7 @@ public class EmailClassifier {
 		this.dealhash.put("away", true);
 		this.dealhash.put("last", true);
 		this.dealhash.put("chance", true);
-		//this.dealhash.put("", true);		
+		this.dealhash.put("savings", true);		
 	}
 
 	public String classifyEmail(Email msg){

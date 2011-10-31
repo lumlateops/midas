@@ -26,7 +26,7 @@ public class DealEmailDAO {
 		stmt = this.access
 				.getConn()
 				.prepareStatement(
-						"Insert into "
+						"Insert ignore into "
 								+ this.table
 								+ " (emailCategory_id,content,dateReceived,domainKey,fromEmail,fromName,parsedContent,senderIP,sentDate,spfResult,subject,toName) values (?,?,?,?,?,?,?,?,?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);

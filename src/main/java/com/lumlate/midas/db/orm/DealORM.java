@@ -22,6 +22,7 @@ public class DealORM {
 	private long locationId;
 	private String tags;
 	private Boolean dealInWallet=false;
+	private String shareUrl;
 	
 	public long getId() {
 		return id;
@@ -131,6 +132,12 @@ public class DealORM {
 	public void setDealInWallet(Boolean dealInWallet) {
 		this.dealInWallet = dealInWallet;
 	}
+	public String getShareUrl() {
+		return shareUrl;
+	}
+	public void setShareUrl(String shareUrl) {
+		this.shareUrl = shareUrl;
+	}
 	public void clear() {
 		id=0;
 		createdAt=null;
@@ -150,7 +157,7 @@ public class DealORM {
 		locationId=0;
 		tags=null;
 		dealInWallet=false;
-		
+		shareUrl=null;
 	}
 
 }

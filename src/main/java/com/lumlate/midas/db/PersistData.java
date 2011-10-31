@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.lumlate.midas.coupon.Coupon;
+import com.lumlate.midas.db.MySQLAccess;
 import com.lumlate.midas.db.dao.AccountDAO;
 import com.lumlate.midas.db.dao.DealDAO;
 import com.lumlate.midas.db.dao.DealDealCategoryDAO;
@@ -129,12 +130,19 @@ public class PersistData {
 		emailorm.setSpfResult(email.getSpf_result());
 		emailorm.setSubject(email.getSubject());
 		emailorm.setToName(email.getToname());
-		emailorm = emaildao.insertGetId(emailorm);
+		try {
+			emailorm = emaildao.insertGetId(emailorm);
+		} catch (Exception err) {
+			System.out.println("Can't add row in dealemail");
+			err.printStackTrace();
+			clear();
+			return;
+		}
 
-		if (accountorm.getEmail() == null)
+		if (email.getToemail() != null && !email.getToemail().isEmpty()) {
 			accountorm.setEmail(email.getToemail());
-		if (accountorm.getId() <= 0)
 			accountorm = accountdao.getIDfromEmail(accountorm);
+		}
 
 		department.setCreatedAt(emailorm.getDateReceived());
 		department.setEmail(emailorm.getFromEmail());
@@ -147,6 +155,7 @@ public class PersistData {
 		try {
 			department = departmentdao.insertGetId(department);
 		} catch (Exception err) {
+			System.out.println("Can't add row in department");
 			err.printStackTrace();
 		}
 		subscription.setAccountId(accountorm.getId());// change it
@@ -156,12 +165,7 @@ public class PersistData {
 		try {
 			subscription = subscriptiondao.insertGetId(subscription);
 		} catch (Exception err) {
-			System.out
-					.println("----------------------------------------------------------------------");
-			System.out.println(email.getFromemail());
-			System.out.println(email.getFromname());
-			System.out
-			.println("----------------------------------------------------------------------");
+			System.out.println("Can't add row in subscription");
 			err.printStackTrace();
 		}
 
@@ -178,6 +182,18 @@ public class PersistData {
 		deal.setFreeShipping(coupon.isIs_free_shipping());
 		deal.setValidTo(coupon.getValidupto());
 		deal.setDealEmailId(emailorm.getId());
+		String year = email.getRecieveddate().split("\\s+")[0].split("-")[0];
+		String month = email.getRecieveddate().split("\\s+")[0].split("-")[1];
+		String day = email.getRecieveddate().split("\\s+")[0].split("-")[2];
+		String shareUrl = year
+				+ "/"
+				+ month
+				+ "/"
+				+ day
+				+ "/"
+				+ deal.getTitle().replaceAll("\\s+", "_")
+						.replaceAll("\\W+", "");
+		deal.setShareUrl(shareUrl);
 		if (coupon.getProducts() != null && coupon.getProducts().size() > 0) {
 			String tags = "";
 			for (ProductORM p : coupon.getProducts()) {
@@ -185,9 +201,18 @@ public class PersistData {
 			}
 			deal.setTags(tags.substring(0, tags.length() - 1));
 		}
-		deal = dealdao.insertGetId(deal);
+		try {
+			deal = dealdao.insertGetId(deal);
+
+		} catch (Exception err) {
+			System.out.println("Can't add row in Deal");
+			err.printStackTrace();
+			return;
+		}
+		
 		List<DealDealCategoryORM> dealdealcategorylist = new ArrayList<DealDealCategoryORM>();
 		List<DealProductORM> dealproductlist = new ArrayList<DealProductORM>();
+
 		if (coupon.getProducts() != null && coupon.getProducts().size() > 0) {
 			for (ProductORM p : coupon.getProducts()) {
 				DealDealCategoryORM d = new DealDealCategoryORM();
@@ -200,8 +225,16 @@ public class PersistData {
 				dp.setProductId(p.getId());
 				dealproductlist.add(dp);
 			}
-			dealdealcategorydao.multiInsertGetIds(dealdealcategorylist);
-			dealproductdao.multiInsertGetIds(dealproductlist);
+			try{
+				dealdealcategorydao.multiInsertGetIds(dealdealcategorylist);
+			}catch (Exception err){
+				err.printStackTrace();
+			}
+			try{
+				dealproductdao.multiInsertGetIds(dealproductlist);
+			}catch (Exception err){
+				err.printStackTrace();
+			}
 		}
 
 		clear();
@@ -214,5 +247,4 @@ public class PersistData {
 		subscription.clear();
 		deal.clear();
 	}
-
 }

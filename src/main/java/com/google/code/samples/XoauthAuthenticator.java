@@ -26,6 +26,9 @@ import java.security.Security;
 import java.util.Hashtable;
 import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.URLName;
@@ -51,8 +54,8 @@ public class XoauthAuthenticator {
    * Generates a new OAuthConsumer with token and secret of
    * "anonymous"/"anonymous". This can be used for testing.
    */
-  public static OAuthConsumer getAnonymousConsumer() {
-    return new OAuthConsumer(null, "anonymous", "anonymous", null);
+  public static OAuthConsumer getDeallrConsumer() {
+    return new OAuthConsumer(null, "deallr.com", "f_yk4d2GkQljJ38JQrcRJBPr", null);
   }
 
   /**
@@ -90,6 +93,11 @@ public class XoauthAuthenticator {
     Properties props = new Properties();
     props.put("mail.imaps.sasl.enable", "true");
     props.put("mail.imaps.sasl.mechanisms", "XOAUTH");
+    props.put("mail.imaps.connectiontimeout", 50000);
+	props.put("mail.imaps.timeout", 50000);
+    props.put("mail.imap.connectiontimeout", 50000);
+	props.put("mail.imap.timeout", 50000);
+	props.put("mail.mime.encodeeol.strict",true);
     props.put(XoauthSaslClientFactory.OAUTH_TOKEN_PROP,
               oauthToken);
     props.put(XoauthSaslClientFactory.OAUTH_TOKEN_SECRET_PROP,
@@ -99,12 +107,12 @@ public class XoauthAuthenticator {
     props.put(XoauthSaslClientFactory.CONSUMER_SECRET_PROP,
               consumer.consumerSecret);
     Session session = Session.getInstance(props);
-    session.setDebug(true);
-    
+    //session.setDebug(true);
     final URLName unusedUrlName = null;
     IMAPSSLStore store = new IMAPSSLStore(session, unusedUrlName);
     final String emptyPassword = "";
     store.connect(host, port, userEmail, emptyPassword);
+    Thread.sleep(1000);
     return store;
   }
 }

@@ -15,19 +15,15 @@ package com.lumlate.midas.email;
  * limitations under the License.
  */
 
-import com.lumlate.midas.db.MySQLAccess;
-import com.lumlate.midas.db.dao.AccountDAO;
-import com.lumlate.midas.db.dao.FetchHistoryDAO;
-import com.lumlate.midas.db.dao.RetailersDAO;
-import com.lumlate.midas.db.orm.AccountORM;
-import com.lumlate.midas.db.orm.FetchHistoryORM;
+import com.google.code.samples.XoauthAuthenticator;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.MessageProperties;
+import com.sun.mail.imap.IMAPSSLStore;
+import com.sun.mail.pop3.POP3SSLStore;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,14 +31,15 @@ import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.URLName;
 import javax.mail.search.AndTerm;
 import javax.mail.search.ComparisonTerm;
 import javax.mail.search.FlagTerm;
-import javax.mail.search.FromStringTerm;
 import javax.mail.search.OrTerm;
 import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
@@ -51,13 +48,14 @@ public class InboxReader {
 	private LinkedList<SearchTerm> searchterms;
 	private SimpleDateFormat dateformat;
 	private Calendar cal;
-	private Date onemonthagao;
+	private Date fetchsince;
 
 	public InboxReader() {
 		dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		cal = Calendar.getInstance();
-		cal.add(Calendar.MONTH, -1);
-		onemonthagao = cal.getTime();
+		cal.add(Calendar.DAY_OF_MONTH, -10);
+		fetchsince = cal.getTime();
+		XoauthAuthenticator.initialize();
 	}
 
 	public LinkedList<SearchTerm> getSearchterms() {
@@ -68,10 +66,9 @@ public class InboxReader {
 		this.searchterms = searchterms;
 	}
 
-	public Boolean readInbox(Properties props, String protocol, String hostname,
-			String username, String password, Date lastfetch) throws Exception {
-		String TASK_QUEUE_NAME = props
-				.getProperty("com.lumlate.midas.rmq.scheduler.queue");
+	public Boolean readInbox(Properties props, String protocol,
+			String hostname, String username, String password, Date lastfetch,
+			String TASK_QUEUE_NAME) throws Exception {
 		String rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
 		String rmqusername = props
 				.getProperty("com.lumlate.midas.rmq.username");
@@ -87,46 +84,133 @@ public class InboxReader {
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 
 		Session session = Session.getDefaultInstance(props, null);
+		// session.setDebug(true);
+		// session.setDebugOut(System.out);
 		Store store = session.getStore(protocol);
 		store.connect(hostname, username, password);
-		Folder folder = store.getFolder("INBOX");// get inbox
-		folder.open(Folder.READ_ONLY);// open folder only to read
-		SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+		// Folder folder = store.getFolder("Inbox");// get inbox
+		Folder folder = store.getDefaultFolder();
+		folder.open(Folder.READ_WRITE);
+		Folder deallrfolder = folder.getFolder("Deallr");
+		// if (!deallrfolder.exists()) {
+		try {
+			deallrfolder.create(Folder.HOLDS_MESSAGES);
+		} catch (Exception err) {
+			System.out.println("Cannot create Folder");
+			err.printStackTrace();
+		}
+		// }
+
+		// SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN),
+		// false);
 
 		SearchTerm[] starray = new SearchTerm[searchterms.size()];
 		searchterms.toArray(starray);
 		SearchTerm st = new OrTerm(starray); // TODO add date to this as
-												// well so
+		SearchTerm newerThen; // well so
 		// that fetch is since last time
 		if (lastfetch != null) {
-
-			SearchTerm newerThen = new ReceivedDateTerm(ComparisonTerm.GT,
-					lastfetch);
-			st = new AndTerm(st, flagterm);
+			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, lastfetch);
+			// st = new AndTerm(st, flagterm);
 			st = new AndTerm(st, newerThen);
 		} else {
-			SearchTerm newerThen = new ReceivedDateTerm(ComparisonTerm.GT,
-					onemonthagao);
-			st = new AndTerm(st, flagterm);
+			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, fetchsince);
+			// st = new AndTerm(st, flagterm);
 			st = new AndTerm(st, newerThen);
 		}
-		try{
+		try {
 			Message message[] = folder.search(st);
-			// Message message[]=folder.getMessages();
 			for (int i = 0; i < message.length; i++) {
 				Message msg = message[i];
+				folder.copyMessages(new Message[] { msg }, deallrfolder);
+				msg.setFlag(Flag.SEEN, true);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				msg.writeTo(bos);
 				byte[] buf = bos.toByteArray();
 				channel.basicPublish("", TASK_QUEUE_NAME,
 						MessageProperties.PERSISTENT_TEXT_PLAIN, buf);
 			}
-		}catch (Exception err){
+		} catch (Exception err) {
+			err.printStackTrace();
 			throw new Exception(err.getMessage());
 		}
 
 		folder.close(true);
 		store.close();
+		channel.close();
+		connection.close();
+		return true;
+	}
+
+	public Boolean readOauthInbox(Properties props, String scope, String email,
+			String oauthToken, String oauthTokenSecret, Date lastfetch,
+			String TASK_QUEUE_NAME) throws Exception {
+		String rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
+		String rmqusername = props
+				.getProperty("com.lumlate.midas.rmq.username");
+		String rmqpassword = props
+				.getProperty("com.lumlate.midas.rmq.password");
+
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setUsername(rmqusername);
+		factory.setPassword(rmqpassword);
+		factory.setHost(rmqserver);
+		Connection connection = factory.newConnection();
+		Channel channel = connection.createChannel();
+		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+
+		Store imapSslStore = XoauthAuthenticator
+				.connectToImap("imap.googlemail.com", 993, email, oauthToken,
+						oauthTokenSecret,
+						XoauthAuthenticator.getDeallrConsumer(), true);
+		/*
+		 * Session session = Session.getDefaultInstance(props, null); Store
+		 * store = session.getStore(protocol); store.connect(hostname, username,
+		 * password);
+		 */
+		// SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN),
+		// false);
+
+		SearchTerm[] starray = new SearchTerm[searchterms.size()];
+		searchterms.toArray(starray);
+		SearchTerm st = new OrTerm(starray); // TODO add date to this as
+		SearchTerm newerThen; // well so
+		// that fetch is since last time
+		if (lastfetch != null) {
+			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, lastfetch);
+			// st = new AndTerm(st, flagterm);
+			st = new AndTerm(st, newerThen);
+		} else {
+			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, fetchsince);
+			// st = new AndTerm(st, flagterm);
+			st = new AndTerm(st, newerThen);
+		}
+		Folder folder = imapSslStore.getFolder("Inbox");// get inbox
+		folder.open(Folder.READ_WRITE);
+		//Folder deallrfolder = folder.getFolder("Deallr");
+		//if (!deallrfolder.exists())
+		//	deallrfolder.create(Folder.HOLDS_MESSAGES);
+		try {
+			Message message[] = folder.search(st);
+			//deallrfolder.appendMessages(message);
+			for (int i = 0; i < message.length; i++) {
+				Message msg = message[i];
+				msg.setFlag(Flag.SEEN, true);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				msg.writeTo(bos);
+				byte[] buf = bos.toByteArray();
+				channel.basicPublish("", TASK_QUEUE_NAME,
+						MessageProperties.PERSISTENT_TEXT_PLAIN, buf);
+			}
+			//folder.copyMessages(new Message[] { msg }, deallrfolder);
+		} catch (Exception err) {
+			err.printStackTrace();
+			throw new Exception(err.getMessage());
+		}
+
+		folder.close(true);
+		//deallrfolder.close(true);
+		imapSslStore.close();
 		channel.close();
 		connection.close();
 		return true;
