@@ -8,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.google.gson.Gson;
+
 public class HtmlParser {
 
 	private String url;
@@ -18,6 +20,7 @@ public class HtmlParser {
 	private LinkedList<String> media=new LinkedList<String>();
 	private LinkedList<String> imports=new LinkedList<String>();
 	private LinkedList<String> scripts=new LinkedList<String>();
+	private LinkedList<String> unsubscribelinks = new LinkedList<String>();
 	
 	public String getUrl() {
 		return url;
@@ -118,6 +121,9 @@ public class HtmlParser {
 	 
 	        for (Element link : elinks) {
 	        	if(link.attr("href")!=null){
+	        		if(link.tagName().equalsIgnoreCase("a") && link.text().matches("(?i).*(unsubscribe|preference).*")){
+	        			unsubscribelinks.add(link.attr("href"));
+	        		}
 	                this.links.add(link.attr("href"));
 	        	}
 	        }

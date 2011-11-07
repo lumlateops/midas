@@ -5,7 +5,7 @@ import java.sql.Date;
 import com.lumlate.midas.email.Email;
 
 public class AccountORM {
-	private long id;
+	private long id=0;
 	private boolean active;
 	private Date createdAt;
 	private String dllrAccessToken;
@@ -18,7 +18,23 @@ public class AccountORM {
 	private long userid;
 	private long provider_id;
 	private boolean registeredEmail;
-
+	
+	public AccountORM(){
+		id = 0;
+		active = false;
+		createdAt = null;
+		dllrAccessToken = null;
+		dllrTokenSecret = null;
+		email = null;
+		lastConfirmedAt = null;
+		lastError = null;
+		lastErrorAt = null;
+		updatedAt = null;
+		userid = 0;
+		provider_id = 0;
+		registeredEmail=false;	
+	}
+	
 	public long getId() {
 		return id;
 	}

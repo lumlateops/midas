@@ -22,7 +22,8 @@ public class FetchHistoryDAO {
 
 	public FetchHistoryORM insert(FetchHistoryORM fetchhistory)
 			throws Exception {
-
+		Gson gson = new Gson();
+		System.out.println(gson.toJson(fetchhistory));
 		stmt = this.access
 				.getConn()
 				.prepareStatement(
@@ -36,6 +37,7 @@ public class FetchHistoryDAO {
 		stmt.setString(4, fetchhistory.getFetchStatus());
 		stmt.setString(5, fetchhistory.getSessionid());
 		stmt.setLong(6, fetchhistory.getUserid());
+		System.out.println(fetchhistory.getUserid());
 		this.stmt.executeUpdate();
 		this.generatedKeys = stmt.getGeneratedKeys();
 		if (generatedKeys.next()) {

@@ -112,7 +112,7 @@ public class XoauthAuthenticator {
     IMAPSSLStore store = new IMAPSSLStore(session, unusedUrlName);
     final String emptyPassword = "";
     store.connect(host, port, userEmail, emptyPassword);
-    Thread.sleep(1000);
+    Thread.sleep(3000);
     return store;
   }
 }

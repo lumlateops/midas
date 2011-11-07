@@ -47,7 +47,7 @@ public class FetchNewRegisteredUser {
 	private ConnectionFactory factory;
 	private Connection connection;
 	private Channel channel;
-	private Gson gson;
+	private long startmilli;
 
 	public FetchNewRegisteredUser(String mysqlhost, String dbport,
 			String dbuser, String dbpassword, String db, Properties props)
@@ -78,7 +78,7 @@ public class FetchNewRegisteredUser {
 		factory.setPassword(props.getProperty("com.lumlate.midas.rmq.password"));
 		connection = factory.newConnection();
 		channel = connection.createChannel();
-		gson = new Gson();
+		startmilli=System.currentTimeMillis();
 	}
 
 	public void clear() throws Exception {
@@ -138,113 +138,152 @@ public class FetchNewRegisteredUser {
 				false, consumer);
 
 		while (true) {
+			if(System.currentTimeMillis()-fetchscheduler.startmilli>=25200000){
+				break;
+			}
 			fetchscheduler.account.clear();
-			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-			String newuser = new String(delivery.getBody());
-			String[] newuser_arr = newuser.split(",");
-			String providername = "";
-			for (String s : newuser_arr) {
-				if (s.contains("email"))
-					fetchscheduler.account.setEmail(s.split("email=")[1]);
-				/*
-				 * else if (s.contains("password"))
-				 * fetchscheduler.account.setPassword(s.split("password=")[1]);
-				 */
-				else if (s.contains("dllrAccessToken")) {
-					fetchscheduler.account.setDllrAccessToken(s
-							.split("dllrAccessToken=")[1]);
-				} else if (s.contains("dllrTokenSecret")) {
-					fetchscheduler.account.setDllrTokenSecret(s
-							.split("dllrTokenSecret=")[1]);
-				} else if (s.contains("serviceProviderName"))
-					providername = s.split("serviceProviderName=")[1]
-							.toLowerCase();
-				else if (s.contains("userId")) {
-					fetchscheduler.account.setUserid(Long.parseLong(s
-							.split("userId=")[1].replace("]", "")));
-				}
-			}
-
-			String emailaddr = fetchscheduler.account.getEmail();
-			String dllrAccessToken = fetchscheduler.account
-					.getDllrAccessToken();
-			String dllrTokenSecret = fetchscheduler.account
-					.getDllrTokenSecret();
-			/*
-			 * String pass = fetchscheduler.account.getPassword(); if (pass !=
-			 * null) { pass = Utility.decrypt(pass); } else { continue; }
-			 */
-			if (emailaddr.isEmpty() || dllrAccessToken.isEmpty()
-					|| dllrTokenSecret.isEmpty() || providername.isEmpty()) {
-				System.out.println("Insufficient Information about user: "
-						+ fetchscheduler.account.getUserid());
-				continue;
-			}
-			props.setProperty("com.lumlate.midas.provider", providername);
-			/*
-			 * String protocol =
-			 * props.getProperty("com.lumlate.midas.mail.store." + providername
-			 * + ".protocol"); String host =
-			 * props.getProperty("com.lumlate.midas.mail." + protocol + "." +
-			 * providername + ".host"); props.setProperty( "mail." + protocol +
-			 * ".connectiontimeout", props.getProperty("com.lumlate.midas.mail."
-			 * + protocol + ".connectiontimeout")); props.setProperty( "mail." +
-			 * protocol + ".timeout",
-			 * props.getProperty("com.lumlate.midas.mail." + protocol +
-			 * ".timeout")); props.setProperty("mail.imap.connectiontimeout",
-			 * "5000"); props.setProperty("mail.imap.timeout", "5000");
-			 * props.setProperty("mail.store.protocol", protocol);
-			 * props.setProperty("mail." + protocol + ".host", host);
-			 * props.setProperty( "mail." + protocol + ".port",
-			 * props.getProperty("com.lumlate.midas.mail." + protocol + "." +
-			 * providername + ".port")); props.setProperty("mail." + protocol +
-			 * ".socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-			 * props.setProperty("mail." + protocol + ".socketFactory.fallback",
-			 * "false"); fetchscheduler.NEW_USER_QUEUE_NAME
-			 */
-			String scope = null;
-			if (providername.equalsIgnoreCase("gmail")) {
-				scope = props
-						.getProperty("com.lumlate.midas.oauth.gmail.scope");
-			} else {
-				System.out.println("Other Providers Not Supported");
-				continue;
-			}
-			fetchscheduler.account = fetchscheduler.accountdao
-					.getIDfromEmail(fetchscheduler.account);
-			Date lastfetchdate = null;
-			Date date = new Date();
-			fetchscheduler.fetchorm.setFetchStartTime(fetchscheduler.formatter
-					.format(date));
-			fetchscheduler.fetchorm.setFetchEndTime(fetchscheduler.formatter
-					.format(date));
-			fetchscheduler.fetchorm.setUserid(fetchscheduler.account
-					.getUserid());
-			fetchscheduler.fetchorm.setFetchStatus("In Progress");
-			fetchscheduler.fetchorm.setFetchErrorMessage("");
-			fetchscheduler.fetchorm = fetchscheduler.fetchhistorydao
-					.insert(fetchscheduler.fetchorm);
+			QueueingConsumer.Delivery delivery = null;
 			try {
-				fetchscheduler.inboxreader.readOauthInbox(props, scope,
-						emailaddr, dllrAccessToken, dllrTokenSecret,
-						lastfetchdate, fetchscheduler.NEW_USER_QUEUE_NAME);
-				date = new Date();
+				delivery = consumer.nextDelivery();
+			} catch (Exception err) {
+				err.printStackTrace();
+				continue;
+			}
+			try {
+				String newuser = new String(delivery.getBody());
+				System.out.println(newuser);
+				String[] newuser_arr = newuser.split(",");
+				String providername = "";
+				for (String s : newuser_arr) {
+					System.out.println("XXX " + s);
+					if (s.contains("email"))
+						fetchscheduler.account.setEmail(s.split("email=")[1]);
+					/*
+					 * else if (s.contains("password"))
+					 * fetchscheduler.account.setPassword
+					 * (s.split("password=")[1]);
+					 */
+					else if (s.contains("dllrAccessToken")) {
+						fetchscheduler.account.setDllrAccessToken(s
+								.split("dllrAccessToken=")[1]);
+					} else if (s.contains("dllrTokenSecret")) {
+						fetchscheduler.account.setDllrTokenSecret(s
+								.split("dllrTokenSecret=")[1]);
+					} else if (s.contains("serviceProviderName")) {
+						providername = s.split("serviceProviderName=")[1]
+								.toLowerCase();
+					} else if (s.contains("userId")) {
+						fetchscheduler.account.setUserid(Long.parseLong(s
+								.split("userId=")[1].replace("]", "")));
+					}
+				}
+				String emailaddr = fetchscheduler.account.getEmail();
+				String dllrAccessToken = fetchscheduler.account
+						.getDllrAccessToken();
+				String dllrTokenSecret = fetchscheduler.account
+						.getDllrTokenSecret();
+				/*
+				 * String pass = fetchscheduler.account.getPassword(); if (pass
+				 * != null) { pass = Utility.decrypt(pass); } else { continue; }
+				 */
+				if (emailaddr.isEmpty() || dllrAccessToken.isEmpty()
+						|| dllrTokenSecret.isEmpty() || providername.isEmpty()) {
+					System.out.println("Insufficient Information about user: "
+							+ fetchscheduler.account.getUserid());
+					continue;
+				}
+				props.setProperty("com.lumlate.midas.provider", providername);
+				/*
+				 * String protocol =
+				 * props.getProperty("com.lumlate.midas.mail.store." +
+				 * providername + ".protocol"); String host =
+				 * props.getProperty("com.lumlate.midas.mail." + protocol + "."
+				 * + providername + ".host"); props.setProperty( "mail." +
+				 * protocol + ".connectiontimeout",
+				 * props.getProperty("com.lumlate.midas.mail." + protocol +
+				 * ".connectiontimeout")); props.setProperty( "mail." + protocol
+				 * + ".timeout", props.getProperty("com.lumlate.midas.mail." +
+				 * protocol + ".timeout"));
+				 * props.setProperty("mail.imap.connectiontimeout", "5000");
+				 * props.setProperty("mail.imap.timeout", "5000");
+				 * props.setProperty("mail.store.protocol", protocol);
+				 * props.setProperty("mail." + protocol + ".host", host);
+				 * props.setProperty( "mail." + protocol + ".port",
+				 * props.getProperty("com.lumlate.midas.mail." + protocol + "."
+				 * + providername + ".port")); props.setProperty("mail." +
+				 * protocol + ".socketFactory.class",
+				 * "javax.net.ssl.SSLSocketFactory"); props.setProperty("mail."
+				 * + protocol + ".socketFactory.fallback", "false");
+				 * fetchscheduler.NEW_USER_QUEUE_NAME
+				 */
+				String scope = null;
+				if (providername.equalsIgnoreCase("gmail")) {
+					scope = props
+							.getProperty("com.lumlate.midas.oauth.gmail.scope");
+				} else {
+					System.out.println("Other Providers Not Supported");
+					continue;
+				}
+				fetchscheduler.account = fetchscheduler.accountdao
+						.getIDfromEmail(fetchscheduler.account);
+				Date lastfetchdate = null;
+				Date date = new Date();
+				fetchscheduler.fetchorm
+						.setFetchStartTime(fetchscheduler.formatter
+								.format(date));
 				fetchscheduler.fetchorm
 						.setFetchEndTime(fetchscheduler.formatter.format(date));
-				fetchscheduler.fetchorm.setFetchStatus("Success");
+				fetchscheduler.fetchorm.setUserid(fetchscheduler.account
+						.getUserid());
+				fetchscheduler.fetchorm.setFetchStatus("inprogress");
 				fetchscheduler.fetchorm.setFetchErrorMessage("");
-				fetchscheduler.fetchhistorydao.update(fetchscheduler.fetchorm);
-			} catch (Exception e) {
-				date = new Date();
-				fetchscheduler.fetchorm
-						.setFetchEndTime(fetchscheduler.formatter.format(date));
-				fetchscheduler.fetchorm.setFetchStatus("Error");
-				fetchscheduler.fetchorm.setFetchErrorMessage(e.getMessage());
-				fetchscheduler.fetchhistorydao.update(fetchscheduler.fetchorm);
-				System.out.println("Error fetching emails for user: "
-						+ fetchscheduler.account.getId());
-				e.printStackTrace();
+				fetchscheduler.fetchorm = fetchscheduler.fetchhistorydao
+						.insert(fetchscheduler.fetchorm);
+				try {
+					fetchscheduler.inboxreader.readOauthInbox(props, scope,
+							emailaddr, dllrAccessToken, dllrTokenSecret,
+							lastfetchdate, fetchscheduler.NEW_USER_QUEUE_NAME);
+					date = new Date();
+					fetchscheduler.fetchorm
+							.setFetchEndTime(fetchscheduler.formatter
+									.format(date));
+					fetchscheduler.fetchorm.setFetchStatus("success");
+					fetchscheduler.fetchorm.setFetchErrorMessage("");
+					fetchscheduler.fetchhistorydao
+							.update(fetchscheduler.fetchorm);
+				} catch (Exception e) {
+					date = new Date();
+					fetchscheduler.fetchorm
+							.setFetchEndTime(fetchscheduler.formatter
+									.format(date));
+					fetchscheduler.fetchorm.setFetchStatus("error");
+					fetchscheduler.fetchorm
+							.setFetchErrorMessage(e.getMessage());
+					fetchscheduler.fetchhistorydao
+							.update(fetchscheduler.fetchorm);
+					System.out.println("Error fetching emails for user: "
+							+ fetchscheduler.account.getId());
+					fetchscheduler.channel.basicReject(delivery.getEnvelope()
+							.getDeliveryTag(), false);
+					e.printStackTrace();
+					continue;
+				}
+				fetchscheduler.channel.basicAck(delivery.getEnvelope()
+						.getDeliveryTag(), false);
+				
+				//following code will go away after connection pooling
+				fetchscheduler.myaccess.Dissconnect();
+			} catch (Exception err) {
+				fetchscheduler.channel.basicReject(delivery.getEnvelope()
+						.getDeliveryTag(), false);
+				err.printStackTrace();
+				continue;
 			}
 		}
+		fetchscheduler.connection.close();
+		fetchscheduler.channel.close();
+		fetchscheduler.myaccess.Dissconnect();
+		System.out.println("Disconnecting after 7 hrs of daemon running");
+		System.exit(0);
 	}
 }

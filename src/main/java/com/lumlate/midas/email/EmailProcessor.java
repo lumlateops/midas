@@ -64,9 +64,15 @@ public class EmailProcessor {
 
 		QueueingConsumer consumer = new QueueingConsumer(channel);
 		channel.basicConsume(TASK_QUEUE_NAME, false, consumer);
-
 		while (true) {
-			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+			QueueingConsumer.Delivery delivery = null;
+			try{
+			delivery = consumer.nextDelivery();
+			}catch (Exception err){
+				err.printStackTrace();
+				continue;
+			}
+			
 			ByteArrayInputStream in = new ByteArrayInputStream(
 					delivery.getBody());
 			MimeMessage msg = new MimeMessage(session, in);
@@ -115,11 +121,12 @@ public class EmailProcessor {
 					System.out.println("NOT CATEGORIZED " + email.getSubject());
 				}
 			} catch (Exception e) {
+				channel.basicReject(delivery.getEnvelope().getDeliveryTag(), false);
 				e.printStackTrace();
+				continue;
 			}
 			channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 		}
-
 	}
 
 	public String getProductfile() {

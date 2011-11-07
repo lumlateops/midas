@@ -123,6 +123,11 @@ public class FetchScheduler {
 			} else {
 				continue;
 			}*/
+			if (emailaddr==null || accesstoken==null || tokensecret==null) {
+				System.out.println("Incomplete dataset for Account id:"
+						+ acc.getId());
+				continue;
+			}
 			if (emailaddr.isEmpty() || accesstoken.isEmpty() || tokensecret.isEmpty()) {
 				System.out.println("Incomplete dataset for Account id:"
 						+ acc.getId());
@@ -182,7 +187,7 @@ public class FetchScheduler {
 			if (lastfetch != null) {
 				try {
 					lastfetchdate = fetchscheduler.formatter.parse(lastfetch);
-					if (System.currentTimeMillis() - lastfetchdate.getTime() < 10500000) {
+					if (System.currentTimeMillis() - lastfetchdate.getTime() < 2000000) {
 						continue;
 					}
 				} catch (ParseException e) {
@@ -194,7 +199,7 @@ public class FetchScheduler {
 					.format(date));
 			fetchscheduler.fetchorm.setUserid(fetchscheduler.account
 					.getUserid());
-			fetchscheduler.fetchorm.setFetchStatus("In Progress");
+			fetchscheduler.fetchorm.setFetchStatus("inprogress");
 			fetchscheduler.fetchorm.setFetchErrorMessage("");
 			fetchscheduler.fetchorm = fetchscheduler.fetchhistorydao
 					.insert(fetchscheduler.fetchorm);
@@ -202,18 +207,17 @@ public class FetchScheduler {
 				//fetchscheduler.inboxreader.readInbox(props, protocol, host,
 				//		emailaddr, pass, lastfetchdate, TASK_QUEUE_NAME);
 				fetchscheduler.inboxreader.readOauthInbox(props, scope, emailaddr, accesstoken, tokensecret, lastfetchdate, TASK_QUEUE_NAME);
-				System.out.println("Su");
 				date = new Date();
 				fetchscheduler.fetchorm
 						.setFetchEndTime(fetchscheduler.formatter.format(date));
-				fetchscheduler.fetchorm.setFetchStatus("Success");
+				fetchscheduler.fetchorm.setFetchStatus("success");
 				fetchscheduler.fetchorm.setFetchErrorMessage("");
 				fetchscheduler.fetchhistorydao.update(fetchscheduler.fetchorm);
 			} catch (Exception e) {
 				date = new Date();
 				fetchscheduler.fetchorm
 						.setFetchEndTime(fetchscheduler.formatter.format(date));
-				fetchscheduler.fetchorm.setFetchStatus("Error");
+				fetchscheduler.fetchorm.setFetchStatus("error");
 				fetchscheduler.fetchorm.setFetchErrorMessage(e.getMessage());
 				fetchscheduler.fetchhistorydao.update(fetchscheduler.fetchorm);
 				System.out.println("Error fetching emails for user: "
