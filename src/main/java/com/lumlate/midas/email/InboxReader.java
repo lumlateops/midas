@@ -53,7 +53,7 @@ public class InboxReader {
 	public InboxReader() {
 		dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		cal = Calendar.getInstance();
-		cal.add(Calendar.DAY_OF_MONTH, -10);
+		cal.add(Calendar.DAY_OF_MONTH, -15);
 		fetchsince = cal.getTime();
 		XoauthAuthenticator.initialize();
 	}
@@ -91,7 +91,7 @@ public class InboxReader {
 		// Folder folder = store.getFolder("Inbox");// get inbox
 		Folder folder = store.getDefaultFolder();
 		folder.open(Folder.READ_WRITE);
-		Folder deallrfolder = folder.getFolder("Deallr");
+		Folder deallrfolder = store.getFolder("Deallr");
 		// if (!deallrfolder.exists()) {
 		try {
 			deallrfolder.create(Folder.HOLDS_MESSAGES);
@@ -144,7 +144,7 @@ public class InboxReader {
 
 	public Boolean readOauthInbox(Properties props, String scope, String email,
 			String oauthToken, String oauthTokenSecret, Date lastfetch,
-			String TASK_QUEUE_NAME) throws Exception {
+			String TASK_QUEUE_NAME, String fetchtype) throws Exception {
 		String rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
 		String rmqusername = props
 				.getProperty("com.lumlate.midas.rmq.username");
@@ -163,36 +163,30 @@ public class InboxReader {
 				.connectToImap("imap.googlemail.com", 993, email, oauthToken,
 						oauthTokenSecret,
 						XoauthAuthenticator.getDeallrConsumer(), true);
-		/*
-		 * Session session = Session.getDefaultInstance(props, null); Store
-		 * store = session.getStore(protocol); store.connect(hostname, username,
-		 * password);
-		 */
-		// SearchTerm flagterm = new FlagTerm(new Flags(Flags.Flag.SEEN),
-		// false);
 
 		SearchTerm[] starray = new SearchTerm[searchterms.size()];
 		searchterms.toArray(starray);
 		SearchTerm st = new OrTerm(starray); // TODO add date to this as
-		SearchTerm newerThen; // well so
+		SearchTerm newerThen; 
 		// that fetch is since last time
 		if (lastfetch != null) {
 			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, lastfetch);
-			// st = new AndTerm(st, flagterm);
 			st = new AndTerm(st, newerThen);
 		} else {
 			newerThen = new ReceivedDateTerm(ComparisonTerm.GT, fetchsince);
-			// st = new AndTerm(st, flagterm);
 			st = new AndTerm(st, newerThen);
 		}
-		Folder folder = imapSslStore.getFolder("Inbox");// get inbox
+
+		Folder folder = imapSslStore.getFolder("[Gmail]/All Mail");// get inbox
 		folder.open(Folder.READ_WRITE);
-		//Folder deallrfolder = folder.getFolder("Deallr");
-		//if (!deallrfolder.exists())
-		//	deallrfolder.create(Folder.HOLDS_MESSAGES);
+		//Folder deallrfolder=null;
+		//if(fetchtype.equalsIgnoreCase("scheduler")){
+			//deallrfolder = imapSslStore.getFolder("Deallr");
+			//if (!deallrfolder.exists())
+			//	deallrfolder.create(Folder.HOLDS_MESSAGES);			
+		//}
 		try {
 			Message message[] = folder.search(st);
-			//deallrfolder.appendMessages(message);
 			for (int i = 0; i < message.length; i++) {
 				Message msg = message[i];
 				msg.setFlag(Flag.SEEN, true);
@@ -201,8 +195,10 @@ public class InboxReader {
 				byte[] buf = bos.toByteArray();
 				channel.basicPublish("", TASK_QUEUE_NAME,
 						MessageProperties.PERSISTENT_TEXT_PLAIN, buf);
+				//if(deallrfolder!=null){
+				//	folder.copyMessages(new Message[] { msg }, deallrfolder);
+				//}
 			}
-			//folder.copyMessages(new Message[] { msg }, deallrfolder);
 		} catch (Exception err) {
 			err.printStackTrace();
 			throw new Exception(err.getMessage());

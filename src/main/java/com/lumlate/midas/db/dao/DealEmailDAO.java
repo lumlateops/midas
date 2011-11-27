@@ -28,7 +28,7 @@ public class DealEmailDAO {
 				.prepareStatement(
 						"Insert ignore into "
 								+ this.table
-								+ " (emailCategory_id,content,dateReceived,domainKey,fromEmail,fromName,parsedContent,senderIP,sentDate,spfResult,subject,toName) values (?,?,?,?,?,?,?,?,?,?,?,?)",
+								+ " (emailCategory_id,content,dateReceived,domainKey,fromEmail,fromName,parsedContent,senderIP,sentDate,spfResult,subject,toName,unsubscribeLinks) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 						Statement.RETURN_GENERATED_KEYS);
 		stmt.setLong(1, dealemailrow.getCategory());
 		stmt.setString(2, dealemailrow.getContent());
@@ -42,7 +42,7 @@ public class DealEmailDAO {
 		stmt.setString(10, dealemailrow.getSpfResult());
 		stmt.setString(11, dealemailrow.getSubject());
 		stmt.setString(12, dealemailrow.getToName());
-
+		stmt.setString(13, dealemailrow.getUnsubscribeLinks());
 		this.stmt.executeUpdate();
 		this.generatedKeys = stmt.getGeneratedKeys();
 		if (generatedKeys.next()) {

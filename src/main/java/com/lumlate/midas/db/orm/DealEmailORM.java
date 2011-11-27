@@ -18,6 +18,7 @@ public class DealEmailORM {
 	private String spfResult;
 	private String subject;
 	private String toName;
+	private String unsubscribeLinks;
 	
 	public DealEmailORM() {
 		super();
@@ -34,6 +35,7 @@ public class DealEmailORM {
 		this.spfResult = spfResult;
 		this.subject = subject;
 		this.toName = toName;
+		this.unsubscribeLinks=unsubscribeLinks;
 	}
 	
 	public long getId() {
@@ -116,6 +118,13 @@ public class DealEmailORM {
 	public void setToName(String toName) {
 		this.toName = toName;
 	}
+	public String getUnsubscribeLinks() {
+		return unsubscribeLinks;
+	}
+	public void setUnsubscribeLinks(String unsubscribeLinks) {
+		this.unsubscribeLinks = unsubscribeLinks;
+	}
+
 	public void clear() {
 		id=0;
 		category=0;
@@ -129,7 +138,8 @@ public class DealEmailORM {
 		sentDate=null;
 		spfResult=null;
 		subject=null;
-		toName=null;	
+		toName=null;
+		unsubscribeLinks=null;
 	}
 
 }

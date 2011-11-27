@@ -1,14 +1,14 @@
 package com.lumlate.midas.utils;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.google.gson.Gson;
 
 public class HtmlParser {
 
@@ -20,7 +20,7 @@ public class HtmlParser {
 	private LinkedList<String> media=new LinkedList<String>();
 	private LinkedList<String> imports=new LinkedList<String>();
 	private LinkedList<String> scripts=new LinkedList<String>();
-	private LinkedList<String> unsubscribelinks = new LinkedList<String>();
+	private String unsubscribelinks="";
 	
 	public String getUrl() {
 		return url;
@@ -85,7 +85,14 @@ public class HtmlParser {
 	public void setScripts(LinkedList<String> scripts) {
 		this.scripts = scripts;
 	}
-
+	
+	public String getUnsubscribelinks(){
+		return unsubscribelinks;
+	}
+	public void setUnsubscribelinks(String unsubscribelinks) {
+		this.unsubscribelinks = unsubscribelinks;
+	}
+	
 	public void parsehtml(String html) throws Exception{
 		if(html==null){
 			String err="Please provide a non empty html string";
@@ -118,16 +125,19 @@ public class HtmlParser {
 	            	this.media.add(src.attr("abs:src"));
 	            }
 	        }
-	 
+	        Set<String> ulink=new HashSet<String>();
 	        for (Element link : elinks) {
 	        	if(link.attr("href")!=null){
 	        		if(link.tagName().equalsIgnoreCase("a") && link.text().matches("(?i).*(unsubscribe|preference).*")){
-	        			unsubscribelinks.add(link.attr("href"));
+	        			ulink.add(link.attr("href"));
 	        		}
 	                this.links.add(link.attr("href"));
 	        	}
 	        }
-	        
+	        Iterator<String> t=ulink.iterator();
+	       while(t.hasNext()){
+	    	   this.unsubscribelinks+=t.next()+",";
+	       }
 	        for (Element link : eimports) {
 	            this.imports.add(link.attr("rel"));
 	        }

@@ -206,7 +206,7 @@ public class FetchScheduler {
 			try {
 				//fetchscheduler.inboxreader.readInbox(props, protocol, host,
 				//		emailaddr, pass, lastfetchdate, TASK_QUEUE_NAME);
-				fetchscheduler.inboxreader.readOauthInbox(props, scope, emailaddr, accesstoken, tokensecret, lastfetchdate, TASK_QUEUE_NAME);
+				fetchscheduler.inboxreader.readOauthInbox(props, scope, emailaddr, accesstoken, tokensecret, lastfetchdate, TASK_QUEUE_NAME,"scheduler");
 				date = new Date();
 				fetchscheduler.fetchorm
 						.setFetchEndTime(fetchscheduler.formatter.format(date));

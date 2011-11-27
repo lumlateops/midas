@@ -120,7 +120,7 @@ public class EmailParser {
 					email.setFromemail(fromemail);
 				}
 			}
-			if(h.getName().equalsIgnoreCase("Delivered-To")){
+			if(email.getToemail()==null && h.getName().equalsIgnoreCase("Delivered-To")){
 				String value=MimeUtility.decodeText(h.getValue());
 				email.setToemail(value);
 			}

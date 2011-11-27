@@ -2,8 +2,10 @@ package com.lumlate.midas.db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.Gson;
 import com.lumlate.midas.coupon.Coupon;
@@ -35,7 +37,7 @@ public class PersistData {
 	private static String mysqlpassword;
 	private static String database;
 	private static Map<String, Integer> emailcategories;
-	private MySQLAccess myaccess;
+	public MySQLAccess myaccess;
 	private PreparedStatement stmt;
 	private DealEmailORM emailorm;
 	private DealEmailDAO emaildao;
@@ -130,11 +132,11 @@ public class PersistData {
 		emailorm.setSpfResult(email.getSpf_result());
 		emailorm.setSubject(email.getSubject());
 		emailorm.setToName(email.getToname());
+		emailorm.setUnsubscribeLinks(email.getHtml().getUnsubscribelinks());
 		try {
 			emailorm = emaildao.insertGetId(emailorm);
 		} catch (Exception err) {
-			System.out.println("Can't add row in dealemail");
-			err.printStackTrace();
+			System.out.println(err.getMessage());
 			clear();
 			return;
 		}
@@ -205,7 +207,7 @@ public class PersistData {
 			deal = dealdao.insertGetId(deal);
 
 		} catch (Exception err) {
-			System.out.println("Can't add row in Deal");
+			System.out.println("Can't add row in Deal for "+email.getToemail()+" "+email.getToname());
 			err.printStackTrace();
 			return;
 		}
@@ -213,11 +215,30 @@ public class PersistData {
 		List<DealDealCategoryORM> dealdealcategorylist = new ArrayList<DealDealCategoryORM>();
 		List<DealProductORM> dealproductlist = new ArrayList<DealProductORM>();
 
-		if (coupon.getProducts() != null && coupon.getProducts().size() > 0) {
+		if (coupon.getProducts() != null && coupon.getProducts().size() > 0) { //this definetly do not belong here
+			HashMap<Long,Set<ProductORM>> temp=new HashMap<Long,Set<ProductORM>>(); // this is to find get the top category from the deal. category with most items will be selected
 			for (ProductORM p : coupon.getProducts()) {
+				p = productdao.getIDbyItem(p);
+				if(temp.containsKey(p.getCategory_id())){
+					temp.get(p.getCategory_id()).add(p);
+					temp.put(p.getCategory_id(), temp.get(p.getCategory_id()));
+				}else{
+					HashSet<ProductORM> a = new HashSet<ProductORM>();
+					a.add(p);
+					temp.put(p.getCategory_id(),a);
+				}
+			}
+			int longest=0;
+			long fid=0;
+			for(Long id:temp.keySet()){
+				if(temp.get(id).size()>longest){
+					longest=temp.get(id).size();
+					fid=id;
+				}
+			}
+			for(ProductORM p:temp.get(fid)){
 				DealDealCategoryORM d = new DealDealCategoryORM();
 				DealProductORM dp = new DealProductORM();
-				p = productdao.getIDbyItem(p);
 				d.setDealId(deal.getId());
 				d.setCategoryId(p.getCategory_id());
 				dealdealcategorylist.add(d);

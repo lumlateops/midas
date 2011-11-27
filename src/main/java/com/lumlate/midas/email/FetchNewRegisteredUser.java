@@ -47,12 +47,22 @@ public class FetchNewRegisteredUser {
 	private ConnectionFactory factory;
 	private Connection connection;
 	private Channel channel;
-	private long startmilli;
+	private String mysqlhost;
+	private String dbport;
+	private String dbuser;
+	private String dbpassword;
+	private String db;
 
 	public FetchNewRegisteredUser(String mysqlhost, String dbport,
 			String dbuser, String dbpassword, String db, Properties props)
 			throws Exception {
 		super();
+		this.mysqlhost=mysqlhost;
+		this.dbport=dbport;
+		this.dbuser=dbuser;
+		this.dbpassword=dbpassword;
+		this.db=db;
+		
 		retaildao = new RetailersDAO();
 		myaccess = new MySQLAccess(mysqlhost, dbport, dbuser, dbpassword, db);
 		retaildao.setStmt(myaccess.getConn().createStatement());
@@ -78,13 +88,14 @@ public class FetchNewRegisteredUser {
 		factory.setPassword(props.getProperty("com.lumlate.midas.rmq.password"));
 		connection = factory.newConnection();
 		channel = connection.createChannel();
-		startmilli=System.currentTimeMillis();
 	}
 
 	public void clear() throws Exception {
+		this.connection.close();
+		this.channel.close();
 		this.myaccess.Dissconnect();
 	}
-
+		
 	/**
 	 * @param args
 	 * @throws Exception
@@ -104,7 +115,6 @@ public class FetchNewRegisteredUser {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
 		String mysqlhost = props.getProperty("com.lumlate.midas.mysql.host");
 		String dbport = props.getProperty("com.lumlate.midas.mysql.port");
 		String dbuser = props.getProperty("com.lumlate.midas.mysql.user");
@@ -138,9 +148,6 @@ public class FetchNewRegisteredUser {
 				false, consumer);
 
 		while (true) {
-			if(System.currentTimeMillis()-fetchscheduler.startmilli>=25200000){
-				break;
-			}
 			fetchscheduler.account.clear();
 			QueueingConsumer.Delivery delivery = null;
 			try {
@@ -155,7 +162,6 @@ public class FetchNewRegisteredUser {
 				String[] newuser_arr = newuser.split(",");
 				String providername = "";
 				for (String s : newuser_arr) {
-					System.out.println("XXX " + s);
 					if (s.contains("email"))
 						fetchscheduler.account.setEmail(s.split("email=")[1]);
 					/*
@@ -242,7 +248,7 @@ public class FetchNewRegisteredUser {
 				try {
 					fetchscheduler.inboxreader.readOauthInbox(props, scope,
 							emailaddr, dllrAccessToken, dllrTokenSecret,
-							lastfetchdate, fetchscheduler.NEW_USER_QUEUE_NAME);
+							lastfetchdate, fetchscheduler.NEW_USER_QUEUE_NAME,"newuser");
 					date = new Date();
 					fetchscheduler.fetchorm
 							.setFetchEndTime(fetchscheduler.formatter
@@ -271,8 +277,6 @@ public class FetchNewRegisteredUser {
 				fetchscheduler.channel.basicAck(delivery.getEnvelope()
 						.getDeliveryTag(), false);
 				
-				//following code will go away after connection pooling
-				fetchscheduler.myaccess.Dissconnect();
 			} catch (Exception err) {
 				fetchscheduler.channel.basicReject(delivery.getEnvelope()
 						.getDeliveryTag(), false);
@@ -280,10 +284,5 @@ public class FetchNewRegisteredUser {
 				continue;
 			}
 		}
-		fetchscheduler.connection.close();
-		fetchscheduler.channel.close();
-		fetchscheduler.myaccess.Dissconnect();
-		System.out.println("Disconnecting after 7 hrs of daemon running");
-		System.exit(0);
 	}
 }

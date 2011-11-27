@@ -42,21 +42,27 @@ public class EmailProcessor {
 	private Connection connection;
 	private Channel channel;
 	private Gson gson;
-	
-	public EmailProcessor(Properties props) throws Exception{
+
+	public EmailProcessor(Properties props) throws Exception {
 		gson = new Gson();
-		rmqserver=props.getProperty("com.lumlate.midas.rmq.server");
+		rmqserver = props.getProperty("com.lumlate.midas.rmq.server");
 		factory = new ConnectionFactory();
 		factory.setHost(rmqserver);
 		factory.setUsername(props.getProperty("com.lumlate.midas.rmq.username"));
 		factory.setPassword(props.getProperty("com.lumlate.midas.rmq.password"));
 		connection = factory.newConnection();
 		channel = connection.createChannel();
-		persistdata=new PersistData(props.getProperty("com.lumlate.midas.mysql.host"), props.getProperty("com.lumlate.midas.mysql.port"), props.getProperty("com.lumlate.midas.mysql.user"), props.getProperty("com.lumlate.midas.mysql.password"), props.getProperty("com.lumlate.midas.mysql.database"));
+		persistdata = new PersistData(
+				props.getProperty("com.lumlate.midas.mysql.host"),
+				props.getProperty("com.lumlate.midas.mysql.port"),
+				props.getProperty("com.lumlate.midas.mysql.user"),
+				props.getProperty("com.lumlate.midas.mysql.password"),
+				props.getProperty("com.lumlate.midas.mysql.database"));
 	}
 
 	public void readImapInbox(Session session) throws Exception {
-		CouponBuilder cb = new CouponBuilder(dealregexfile, dateregexfile, productfile);
+		CouponBuilder cb = new CouponBuilder(dealregexfile, dateregexfile,
+				productfile);
 
 		channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
 		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
@@ -66,13 +72,12 @@ public class EmailProcessor {
 		channel.basicConsume(TASK_QUEUE_NAME, false, consumer);
 		while (true) {
 			QueueingConsumer.Delivery delivery = null;
-			try{
-			delivery = consumer.nextDelivery();
-			}catch (Exception err){
+			try {
+				delivery = consumer.nextDelivery();
+			} catch (Exception err) {
 				err.printStackTrace();
-				continue;
 			}
-			
+
 			ByteArrayInputStream in = new ByteArrayInputStream(
 					delivery.getBody());
 			MimeMessage msg = new MimeMessage(session, in);
@@ -107,8 +112,8 @@ public class EmailProcessor {
 				if (!category.isEmpty()) {
 					email.setCategory(category);
 				}
-				if (category.equalsIgnoreCase("deal")
-						|| category.equalsIgnoreCase("subscription")) { 
+				if (!category.equalsIgnoreCase("confirmation")
+						|| !category.equalsIgnoreCase("subscription")) {
 					try {
 						Coupon coupon = cb.BuildCoupon(email);
 						if (coupon != null) {
@@ -121,7 +126,8 @@ public class EmailProcessor {
 					System.out.println("NOT CATEGORIZED " + email.getSubject());
 				}
 			} catch (Exception e) {
-				channel.basicReject(delivery.getEnvelope().getDeliveryTag(), false);
+				channel.basicReject(delivery.getEnvelope().getDeliveryTag(),
+						false);
 				e.printStackTrace();
 				continue;
 			}
@@ -160,6 +166,7 @@ public class EmailProcessor {
 	public void setDateregexfile(String dateregexfile) {
 		this.dateregexfile = dateregexfile;
 	}
+
 	public String getTASK_QUEUE_NAME() {
 		return TASK_QUEUE_NAME;
 	}
@@ -169,8 +176,9 @@ public class EmailProcessor {
 	}
 
 	public static void main(String[] args) {
-		if(args.length<4){
-			System.out.println("Usage: dealregex dateregex productfile fetchtype properties");
+		if (args.length < 4) {
+			System.out
+					.println("Usage: dealregex dateregex productfile fetchtype properties");
 		}
 		Properties props = new Properties();
 		try {
@@ -194,17 +202,24 @@ public class EmailProcessor {
 		newGmailClient.setDealregexfile(args[0]);
 		newGmailClient.setDateregexfile(args[1]);
 		newGmailClient.setProductfile(args[2]);
-		if(args[3].equalsIgnoreCase("scheduler"))
-			newGmailClient.setTASK_QUEUE_NAME(props.getProperty("com.lumlate.midas.rmq.scheduler.queue"));
-		else if(args[3].equalsIgnoreCase("newuser"))
-			newGmailClient.setTASK_QUEUE_NAME(props.getProperty("com.lumlate.midas.rmq.register.publish.queue"));
-		else{
-			System.out.println("Dont understand the fetchtype. FetchType can only be scheduler or newuser");
+		if (args[3].equalsIgnoreCase("scheduler"))
+			newGmailClient.setTASK_QUEUE_NAME(props
+					.getProperty("com.lumlate.midas.rmq.scheduler.queue"));
+		else if (args[3].equalsIgnoreCase("newuser"))
+			newGmailClient
+					.setTASK_QUEUE_NAME(props
+							.getProperty("com.lumlate.midas.rmq.register.publish.queue"));
+		else {
+			System.out
+					.println("Dont understand the fetchtype. FetchType can only be scheduler or newuser");
 			System.exit(0);
 		}
-		
+
 		try {
 			newGmailClient.readImapInbox(session);
+			newGmailClient.persistdata.myaccess.Dissconnect();
+			newGmailClient.connection.close();
+			newGmailClient.channel.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
